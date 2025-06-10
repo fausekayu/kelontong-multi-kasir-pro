@@ -1,12 +1,12 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search, Scan, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import CategoryFilter from './CategoryFilter';
-import CartSummary from './CartSummary';
-import ProductCard from './ProductCard';
+import { Badge } from '@/components/ui/badge';
+import { Search, Plus, Edit, Scan, Package, AlertTriangle } from 'lucide-react';
+import CategoryFilter from '../transaction/CategoryFilter';
+import AddProductModal from './AddProductModal';
+import EditProductModal from './EditProductModal';
 
 interface Product {
   id: string;
@@ -18,16 +18,14 @@ interface Product {
   image?: string;
 }
 
-interface CartItem extends Product {
-  quantity: number;
-}
-
-const TransactionView = () => {
+const StockView = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('semua');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Generate 1000 products with realistic Indonesian grocery store items
+  // Sample products data (same as TransactionView)
   const products: Product[] = [
     // Makanan (Food) - 300 products
     ...Array.from({ length: 50 }, (_, i) => ({
@@ -235,7 +233,6 @@ const TransactionView = () => {
 
   const categories = ['semua', 'makanan', 'minuman', 'kebersihan', 'sembako', 'rokok', 'alat-tulis'];
 
-  // Calculate product counts per category
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = { semua: products.length };
     categories.forEach(category => {
@@ -255,45 +252,49 @@ const TransactionView = () => {
     });
   }, [products, searchQuery, selectedCategory]);
 
-  const addToCart = (product: Product) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
-      if (existingItem) {
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) }
-            : item
-        );
-      }
-      return [...prevCart, { ...product, quantity: 1 }];
-    });
+  const lowStockProducts = products.filter(p => p.stock <= 10);
+
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setShowEditModal(true);
   };
 
-  const updateQuantity = (productId: string, newQuantity: number) => {
-    setCart(prevCart => {
-      if (newQuantity <= 0) {
-        return prevCart.filter(item => item.id !== productId);
-      }
-      return prevCart.map(item =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      );
-    });
-  };
-
-  const handleCheckout = () => {
-    console.log('Proceeding to checkout with cart:', cart);
-    // Here you would implement the checkout process
+  const getStockStatus = (stock: number) => {
+    if (stock <= 5) return { label: 'Habis', color: 'bg-red-500' };
+    if (stock <= 10) return { label: 'Sedikit', color: 'bg-yellow-500' };
+    if (stock <= 50) return { label: 'Normal', color: 'bg-blue-500' };
+    return { label: 'Banyak', color: 'bg-green-500' };
   };
 
   return (
     <div className="space-y-4 pb-6">
-      {/* Cart Summary */}
-      <CartSummary cart={cart} onCheckout={handleCheckout} />
+      {/* Header Stats */}
+      <div className="px-4 grid grid-cols-2 gap-4">
+        <Card className="p-4 bg-gradient-to-r from-blue-50 to-blue-100">
+          <div className="flex items-center space-x-3">
+            <Package className="w-8 h-8 text-blue-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Total Produk</p>
+              <p className="text-xl font-bold text-blue-600">{products.length}</p>
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="p-4 bg-gradient-to-r from-red-50 to-red-100">
+          <div className="flex items-center space-x-3">
+            <AlertTriangle className="w-8 h-8 text-red-600" />
+            <div>
+              <p className="text-sm text-muted-foreground">Stok Menipis</p>
+              <p className="text-xl font-bold text-red-600">{lowStockProducts.length}</p>
+            </div>
+          </div>
+        </Card>
+      </div>
 
-      {/* Search Bar */}
+      {/* Search and Add Product */}
       <Card className="mx-4 bg-white shadow-apple">
         <div className="p-4">
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 mb-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
@@ -305,19 +306,19 @@ const TransactionView = () => {
             </div>
             <Button 
               variant="outline" 
-              className="h-12 px-4 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center"
-              title="Scan Barcode"
+              className="h-12 px-4 rounded-xl border-gray-200 hover:bg-gray-50"
             >
               <Scan className="w-5 h-5" />
             </Button>
-            <Button 
-              variant="outline" 
-              className="h-12 px-4 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center"
-              title="Filter"
-            >
-              <Filter className="w-5 h-5" />
-            </Button>
           </div>
+          
+          <Button 
+            onClick={() => setShowAddModal(true)}
+            className="w-full h-12 gradient-primary text-white font-medium rounded-xl"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Tambah Produk Baru
+          </Button>
         </div>
       </Card>
 
@@ -340,28 +341,51 @@ const TransactionView = () => {
         </p>
       </div>
 
-      {/* Products Grid */}
-      <div className="px-4">
-        <div className="grid grid-cols-2 gap-4">
-          {filteredProducts.map((product) => {
-            const cartItem = cart.find(item => item.id === product.id);
-            
-            return (
-              <ProductCard
-                key={product.id}
-                product={product}
-                cartItem={cartItem}
-                onAddToCart={addToCart}
-                onUpdateQuantity={updateQuantity}
-              />
-            );
-          })}
-        </div>
+      {/* Products List */}
+      <div className="px-4 space-y-3">
+        {filteredProducts.map((product) => {
+          const stockStatus = getStockStatus(product.stock);
+          
+          return (
+            <Card key={product.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="font-medium text-foreground line-clamp-2 mb-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Rp {product.price.toLocaleString('id-ID')}
+                  </p>
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      variant="secondary" 
+                      className={`${stockStatus.color} text-white text-xs px-2 py-1`}
+                    >
+                      {stockStatus.label}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      Stok: {product.stock}
+                    </span>
+                  </div>
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEditProduct(product)}
+                  className="ml-4"
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
         
         {filteredProducts.length === 0 && (
           <Card className="p-8 text-center">
             <div className="text-gray-400 mb-4">
-              <Search className="w-16 h-16 mx-auto" />
+              <Package className="w-16 h-16 mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">
               Produk tidak ditemukan
@@ -372,8 +396,22 @@ const TransactionView = () => {
           </Card>
         )}
       </div>
+
+      {/* Modals */}
+      <AddProductModal 
+        isOpen={showAddModal} 
+        onClose={() => setShowAddModal(false)} 
+      />
+      
+      {selectedProduct && (
+        <EditProductModal 
+          isOpen={showEditModal} 
+          onClose={() => setShowEditModal(false)}
+          product={selectedProduct}
+        />
+      )}
     </div>
   );
 };
 
-export default TransactionView;
+export default StockView;

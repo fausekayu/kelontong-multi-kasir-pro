@@ -4,6 +4,8 @@ import AuthLayout from '@/components/auth/AuthLayout';
 import LoginForm from '@/components/auth/LoginForm';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import TransactionView from '@/components/transaction/TransactionView';
+import StockView from '@/components/stock/StockView';
+import ProfileView from '@/components/profile/ProfileView';
 import { Card } from '@/components/ui/card';
 import { Package, User } from 'lucide-react';
 
@@ -43,29 +45,9 @@ const Index = () => {
       case 'transaction':
         return <TransactionView />;
       case 'stock':
-        return (
-          <div className="space-y-4">
-            <Card className="p-8 text-center">
-              <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">Manajemen Stok</h3>
-              <p className="text-muted-foreground">
-                Kelola stok produk, update harga, dan pantau inventory toko Anda.
-              </p>
-            </Card>
-          </div>
-        );
+        return <StockView />;
       case 'profile':
-        return (
-          <div className="space-y-4">
-            <Card className="p-8 text-center">
-              <User className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">Profil Pengguna</h3>
-              <p className="text-muted-foreground">
-                Kelola profil, pengaturan toko, dan konfigurasi sistem.
-              </p>
-            </Card>
-          </div>
-        );
+        return <ProfileView currentUser={currentUser!} />;
       default:
         return <TransactionView />;
     }
