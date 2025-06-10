@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import CategoryFilter from './CategoryFilter';
 import CartSummary from './CartSummary';
 import ProductCard from './ProductCard';
+import CheckoutModal from './CheckoutModal';
+import BarcodeScanner from './BarcodeScanner';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
   id: string;
@@ -26,13 +28,26 @@ const TransactionView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('semua');
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const { toast } = useToast();
 
-  // Generate 1000 products with realistic Indonesian grocery store items
+  // Product images mapping
+  const productImages: Record<string, string> = {
+    'Indomie Goreng': 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&w=800&q=80',
+    'Aqua 600ml': 'https://images.unsplash.com/photo-1560949003-69e8914953cb?auto=format&fit=crop&w=800&q=80',
+    'Coca Cola 330ml': 'https://images.unsplash.com/photo-1624797432677-6f803a98acb3?auto=format&fit=crop&w=800&q=80',
+    'Beras Cap Jago 5kg': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80',
+    'Minyak Goreng Bimoli 1L': 'https://images.unsplash.com/photo-1620705876977-caab1d80f12a?auto=format&fit=crop&w=800&q=80',
+    'Gudang Garam Surya 12': 'https://images.unsplash.com/photo-1566841169427-7c2b2455f3ba?auto=format&fit=crop&w=800&q=80',
+    'Pulpen Standard AE7': 'https://images.unsplash.com/photo-1583485088034-4e64f143be11?auto=format&fit=crop&w=800&q=80',
+  };
+
+  // Generate 1000 products with realistic Indonesian grocery store items and barcodes
   const products: Product[] = [
     // Makanan (Food) - 300 products
-    ...Array.from({ length: 50 }, (_, i) => ({
-      id: `makanan-${i + 1}`,
-      name: [
+    ...Array.from({ length: 50 }, (_, i) => {
+      const names = [
         'Indomie Goreng', 'Indomie Ayam Bawang', 'Mie Sedaap Goreng', 'Sarimi Ayam Bawang',
         'Pop Mie Ayam', 'Supermie Ayam', 'Gaga Baso', 'Indomie Soto Mie',
         'Mie Sedaap Kari Ayam', 'Sarimi Goreng', 'Pop Mie Pedas', 'Supermie Baso',
@@ -46,11 +61,18 @@ const TransactionView = () => {
         'Beras Rojo Lele 5kg', 'Beras IR64 5kg', 'Beras Pandan Wangi', 'Tepung Terigu Segitiga',
         'Gula Pasir Gulaku', 'Garam Halus Kapal', 'Minyak Goreng Bimoli', 'Margarin Blue Band',
         'Mentega Wijsman', 'Keju Kraft Cheddar'
-      ][i % 50],
-      price: Math.floor(Math.random() * 50000) + 2000,
-      stock: Math.floor(Math.random() * 100) + 5,
-      category: 'makanan'
-    })),
+      ];
+      const name = names[i % 50];
+      return {
+        id: `makanan-${i + 1}`,
+        name: name,
+        price: Math.floor(Math.random() * 50000) + 2000,
+        stock: Math.floor(Math.random() * 100) + 5,
+        category: 'makanan',
+        barcode: `8998888${(100000 + i).toString()}`,
+        image: productImages[name] || 'https://images.unsplash.com/photo-1613920346957-c9a2db5a75d4?auto=format&fit=crop&w=800&q=80'
+      }
+    }),
 
     ...Array.from({ length: 100 }, (_, i) => ({
       id: `makanan-instant-${i + 1}`,
@@ -281,8 +303,34 @@ const TransactionView = () => {
   };
 
   const handleCheckout = () => {
-    console.log('Proceeding to checkout with cart:', cart);
-    // Here you would implement the checkout process
+    setShowCheckout(true);
+  };
+
+  const handlePaymentComplete = (paymentMethod: string) => {
+    toast({
+      title: "Transaksi Berhasil",
+      description: `Pembayaran dengan ${paymentMethod} telah selesai`
+    });
+    setCart([]);
+    setShowCheckout(false);
+  };
+
+  const handleBarcodeScanned = (barcode: string) => {
+    const product = products.find(p => p.barcode === barcode);
+    if (product) {
+      addToCart(product);
+      toast({
+        title: "Produk Ditemukan",
+        description: `${product.name} ditambahkan ke keranjang`
+      });
+    } else {
+      toast({
+        title: "Produk Tidak Ditemukan",
+        description: `Barcode ${barcode} tidak terdaftar`,
+        variant: "destructive"
+      });
+    }
+    setShowScanner(false);
   };
 
   return (
@@ -306,6 +354,7 @@ const TransactionView = () => {
             <Button 
               variant="outline" 
               className="h-12 px-4 rounded-xl border-gray-200 hover:bg-gray-50 flex items-center justify-center"
+              onClick={() => setShowScanner(true)}
               title="Scan Barcode"
             >
               <Scan className="w-5 h-5" />
@@ -372,6 +421,25 @@ const TransactionView = () => {
           </Card>
         )}
       </div>
+
+      {/* Checkout Modal */}
+      {showCheckout && (
+        <CheckoutModal
+          isOpen={showCheckout}
+          onClose={() => setShowCheckout(false)}
+          cart={cart}
+          onPaymentComplete={handlePaymentComplete}
+        />
+      )}
+
+      {/* Barcode Scanner Modal */}
+      {showScanner && (
+        <BarcodeScanner
+          isOpen={showScanner}
+          onClose={() => setShowScanner(false)}
+          onBarcodeScanned={handleBarcodeScanned}
+        />
+      )}
     </div>
   );
 };

@@ -61,6 +61,13 @@ const ProductCard = ({ product, cartItem, onAddToCart, onUpdateQuantity }: Produ
             Hampir Habis
           </Badge>
         )}
+        
+        {/* Barcode Badge */}
+        {product.barcode && (
+          <Badge variant="outline" className="absolute bottom-2 left-2 bg-white/80 text-xs">
+            {product.barcode}
+          </Badge>
+        )}
       </div>
 
       {/* Product Info */}

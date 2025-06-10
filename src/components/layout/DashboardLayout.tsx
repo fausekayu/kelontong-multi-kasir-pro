@@ -6,12 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { 
   ShoppingCart, 
   Package, 
-  User, 
   BarChart3, 
   Store, 
   ChevronDown,
   Bell,
-  Search
+  Search,
+  User
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -26,6 +26,7 @@ interface DashboardLayoutProps {
   activeTab: 'transaction' | 'stock' | 'profile';
   onTabChange: (tab: 'transaction' | 'stock' | 'profile') => void;
   onStoreChange?: (store: string) => void;
+  onProfileClick?: () => void;
 }
 
 const DashboardLayout = ({ 
@@ -33,14 +34,30 @@ const DashboardLayout = ({
   currentUser, 
   activeTab, 
   onTabChange,
-  onStoreChange 
+  onStoreChange,
+  onProfileClick 
 }: DashboardLayoutProps) => {
   const [showStoreSelector, setShowStoreSelector] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Selamat Pagi';
+    if (hour < 15) return 'Selamat Siang';
+    if (hour < 18) return 'Selamat Sore';
+    return 'Selamat Malam';
+  };
 
   const tabs = [
     { id: 'transaction' as const, label: 'Transaksi', icon: ShoppingCart },
     { id: 'stock' as const, label: 'Stok', icon: Package },
-    { id: 'profile' as const, label: 'Profil', icon: User },
+    { id: 'insight' as const, label: 'Insight', icon: BarChart3 },
+  ];
+
+  const notifications = [
+    { id: 1, message: 'Stok Indomie Goreng hampir habis', time: '2 menit lalu', type: 'warning' },
+    { id: 2, message: 'Transaksi berhasil - Rp 25.000', time: '5 menit lalu', type: 'success' },
+    { id: 3, message: 'Produk baru ditambahkan', time: '10 menit lalu', type: 'info' },
   ];
 
   return (
@@ -52,6 +69,10 @@ const DashboardLayout = ({
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-sm">POS</span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <span className="text-lg font-bold text-primary">WARLONTAR</span>
               </div>
               
               {currentUser.role === 'owner' && currentUser.stores && (
@@ -90,22 +111,55 @@ const DashboardLayout = ({
             </div>
 
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-                <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-red-500" />
-              </Button>
+              {/* Greeting */}
+              <div className="hidden md:block text-right mr-4">
+                <p className="text-sm text-muted-foreground">{getGreeting()}</p>
+                <p className="text-lg font-semibold text-foreground">{currentUser.name}</p>
+              </div>
+
+              {/* Notifications */}
+              <div className="relative">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="relative"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
+                  <Bell className="w-5 h-5" />
+                  <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-red-500" />
+                </Button>
+                
+                {showNotifications && (
+                  <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-apple-lg border border-gray-200 py-2 z-10">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <h3 className="font-semibold text-foreground">Notifikasi</h3>
+                    </div>
+                    {notifications.map((notif) => (
+                      <div key={notif.id} className="px-4 py-3 hover:bg-gray-50 border-b border-gray-50">
+                        <p className="text-sm text-foreground">{notif.message}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{notif.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               
-              <div className="flex items-center space-x-2">
+              {/* Profile */}
+              <Button
+                variant="ghost"
+                onClick={onProfileClick}
+                className="flex items-center space-x-2"
+              >
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
                     {currentUser.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <div className="hidden sm:block">
+                <div className="hidden sm:block text-left">
                   <p className="text-sm font-medium text-foreground">{currentUser.name}</p>
                   <p className="text-xs text-muted-foreground capitalize">{currentUser.role}</p>
                 </div>
-              </div>
+              </Button>
             </div>
           </div>
         </div>
@@ -133,13 +187,6 @@ const DashboardLayout = ({
               <span className="text-xs font-medium">{tab.label}</span>
             </button>
           ))}
-          
-          <button
-            className="flex flex-col items-center space-y-1 py-2 px-3 rounded-xl text-gray-500 hover:text-gray-700 transition-all duration-200"
-          >
-            <BarChart3 className="w-6 h-6" />
-            <span className="text-xs font-medium">Insight</span>
-          </button>
         </div>
       </nav>
     </div>

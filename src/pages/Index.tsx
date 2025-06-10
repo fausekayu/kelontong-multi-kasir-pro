@@ -6,6 +6,8 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import TransactionView from '@/components/transaction/TransactionView';
 import StockView from '@/components/stock/StockView';
 import ProfileView from '@/components/profile/ProfileView';
+import InsightView from '@/components/insight/InsightView';
+import CheckoutModal from '@/components/transaction/CheckoutModal';
 import { Card } from '@/components/ui/card';
 import { Package, User } from 'lucide-react';
 
@@ -19,7 +21,8 @@ interface User {
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'transaction' | 'stock' | 'profile'>('transaction');
+  const [activeTab, setActiveTab] = useState<'transaction' | 'stock' | 'insight'>('transaction');
+  const [showProfile, setShowProfile] = useState(false);
 
   const handleLogin = (email: string, password: string, role: 'cashier' | 'owner') => {
     // Simulate authentication
@@ -40,14 +43,28 @@ const Index = () => {
     }
   };
 
+  const handleUserUpdate = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
+  };
+
   const renderTabContent = () => {
+    if (showProfile) {
+      return (
+        <ProfileView 
+          currentUser={currentUser!} 
+          onUserUpdate={handleUserUpdate}
+          onBack={() => setShowProfile(false)}
+        />
+      );
+    }
+
     switch (activeTab) {
       case 'transaction':
         return <TransactionView />;
       case 'stock':
         return <StockView />;
-      case 'profile':
-        return <ProfileView currentUser={currentUser!} />;
+      case 'insight':
+        return <InsightView />;
       default:
         return <TransactionView />;
     }
@@ -72,8 +89,12 @@ const Index = () => {
     <DashboardLayout
       currentUser={currentUser!}
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={(tab) => {
+        setActiveTab(tab);
+        setShowProfile(false);
+      }}
       onStoreChange={handleStoreChange}
+      onProfileClick={() => setShowProfile(true)}
     >
       {renderTabContent()}
     </DashboardLayout>

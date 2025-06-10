@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { User, Store, Phone, Mail, MapPin, Camera, Settings } from 'lucide-react';
+import { User, Store, Phone, Mail, MapPin, Camera, Settings, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface User {
@@ -13,39 +13,71 @@ interface User {
   role: 'cashier' | 'owner';
   currentStore: string;
   stores?: string[];
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+interface StoreData {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
 }
 
 interface ProfileViewProps {
   currentUser: User;
+  onUserUpdate?: (user: User) => void;
+  onBack?: () => void;
 }
 
-const ProfileView = ({ currentUser }: ProfileViewProps) => {
+const ProfileView = ({ currentUser, onUserUpdate, onBack }: ProfileViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: currentUser.name,
-    email: 'user@example.com',
-    phone: '08123456789',
-    address: 'Jl. Merdeka No. 123, Jakarta'
+    email: currentUser.email || 'user@example.com',
+    phone: currentUser.phone || '08123456789',
+    address: currentUser.address || 'Jl. Merdeka No. 123, Jakarta'
   });
-  const [storeData, setStoreData] = useState({
+  
+  const [storeData, setStoreData] = useState<StoreData>({
     name: currentUser.currentStore,
     address: 'Jl. Raya Bogor No. 456, Depok',
     phone: '02187654321',
     email: 'toko@example.com'
   });
+  
   const { toast } = useToast();
 
   const handleSaveProfile = () => {
-    // Simulate save
+    if (onUserUpdate) {
+      const updatedUser = {
+        ...currentUser,
+        name: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone,
+        address: profileData.address
+      };
+      onUserUpdate(updatedUser);
+    }
+    
     toast({
       title: "Berhasil",
       description: "Profil berhasil diperbarui"
     });
+    
     setIsEditing(false);
   };
 
   const handleSaveStore = () => {
-    // Simulate save
+    if (onUserUpdate && currentUser.role === 'owner') {
+      const updatedUser = {
+        ...currentUser,
+        currentStore: storeData.name
+      };
+      onUserUpdate(updatedUser);
+    }
+    
     toast({
       title: "Berhasil",
       description: "Data toko berhasil diperbarui"
@@ -56,37 +88,50 @@ const ProfileView = ({ currentUser }: ProfileViewProps) => {
     <div className="space-y-6 pb-6">
       {/* Profile Header */}
       <Card className="mx-4 p-6 bg-gradient-to-r from-blue-50 to-blue-100">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Avatar className="w-20 h-20">
-              <AvatarImage src="/placeholder.svg" alt="Profile" />
-              <AvatarFallback className="text-lg font-semibold">
-                {currentUser.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
+        <div className="flex items-center">
+          {onBack && (
             <Button 
-              size="sm" 
-              className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 bg-primary"
+              variant="ghost" 
+              size="sm"
+              onClick={onBack}
+              className="mr-3"
             >
-              <Camera className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          )}
+          
+          <div className="flex items-center space-x-4 flex-1">
+            <div className="relative">
+              <Avatar className="w-20 h-20">
+                <AvatarImage src="/placeholder.svg" alt="Profile" />
+                <AvatarFallback className="text-lg font-semibold">
+                  {currentUser.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <Button 
+                size="sm" 
+                className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 bg-primary"
+              >
+                <Camera className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-foreground">{profileData.name}</h2>
+              <p className="text-sm text-muted-foreground capitalize">
+                {currentUser.role === 'owner' ? 'Pemilik Toko' : 'Kasir'}
+              </p>
+              <p className="text-sm text-primary font-medium">{storeData.name}</p>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? 'Batal' : 'Edit'}
             </Button>
           </div>
-          
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-foreground">{currentUser.name}</h2>
-            <p className="text-sm text-muted-foreground capitalize">
-              {currentUser.role === 'owner' ? 'Pemilik Toko' : 'Kasir'}
-            </p>
-            <p className="text-sm text-primary font-medium">{currentUser.currentStore}</p>
-          </div>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {isEditing ? 'Batal' : 'Edit'}
-          </Button>
         </div>
       </Card>
 
