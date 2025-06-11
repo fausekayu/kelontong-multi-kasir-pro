@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,8 @@ import { Search, Plus, Edit, Scan, Package, AlertTriangle } from 'lucide-react';
 import CategoryFilter from '../transaction/CategoryFilter';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './EditProductModal';
+import BarcodeScanner from '../transaction/BarcodeScanner';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
   id: string;
@@ -18,221 +20,60 @@ interface Product {
   image?: string;
 }
 
+// Simple state for global products (simulating a backend)
+let globalProducts: Product[] = [];
+
 const StockView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('semua');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const { toast } = useToast();
 
-  // Sample products data (same as TransactionView)
-  const products: Product[] = [
-    // Makanan (Food) - 300 products
-    ...Array.from({ length: 50 }, (_, i) => ({
-      id: `makanan-${i + 1}`,
-      name: [
-        'Indomie Goreng', 'Indomie Ayam Bawang', 'Mie Sedaap Goreng', 'Sarimi Ayam Bawang',
-        'Pop Mie Ayam', 'Supermie Ayam', 'Gaga Baso', 'Indomie Soto Mie',
-        'Mie Sedaap Kari Ayam', 'Sarimi Goreng', 'Pop Mie Pedas', 'Supermie Baso',
-        'Chitato Keju', 'Taro Coklat', 'Qtela Balado', 'Pilus Garlic',
-        'Chiki Balls', 'Cheetos Jagung', 'Lays Rumput Laut', 'Potabee Original',
-        'Biskuit Roma Kelapa', 'Oreo Vanilla', 'Good Time Choco Chip', 'Monde Butter Cookies',
-        'Khong Guan Assorted', 'Richeese Nabati', 'Wafer Tango', 'Biskuit Marie Regal',
-        'Kacang Garuda', 'Kacang Dua Kelinci', 'Sukro Original', 'Kacang Atom',
-        'Kopi Kapal Api', 'Kopi ABC', 'Nescafe Classic', 'Good Day Cappuccino',
-        'Teh Pucuk Harum', 'Teh Kotak Jasmine', 'Ultra Milk Coklat', 'Dancow Fortigro',
-        'Beras Rojo Lele 5kg', 'Beras IR64 5kg', 'Beras Pandan Wangi', 'Tepung Terigu Segitiga',
-        'Gula Pasir Gulaku', 'Garam Halus Kapal', 'Minyak Goreng Bimoli', 'Margarin Blue Band',
-        'Mentega Wijsman', 'Keju Kraft Cheddar'
-      ][i % 50],
-      price: Math.floor(Math.random() * 50000) + 2000,
-      stock: Math.floor(Math.random() * 100) + 5,
-      category: 'makanan'
-    })),
+  // Initialize products on first load
+  useEffect(() => {
+    if (globalProducts.length === 0) {
+      // Generate sample products similar to TransactionView
+      const generatedProducts = [
+        // Makanan (Food) - 300 products
+        ...Array.from({ length: 50 }, (_, i) => ({
+          id: `makanan-${i + 1}`,
+          name: [
+            'Indomie Goreng', 'Indomie Ayam Bawang', 'Mie Sedaap Goreng', 'Sarimi Ayam Bawang',
+            'Pop Mie Ayam', 'Supermie Ayam', 'Gaga Baso', 'Indomie Soto Mie',
+            'Mie Sedaap Kari Ayam', 'Sarimi Goreng', 'Pop Mie Pedas', 'Supermie Baso',
+            'Chitato Keju', 'Taro Coklat', 'Qtela Balado', 'Pilus Garlic',
+            'Chiki Balls', 'Cheetos Jagung', 'Lays Rumput Laut', 'Potabee Original',
+            'Biskuit Roma Kelapa', 'Oreo Vanilla', 'Good Time Choco Chip', 'Monde Butter Cookies',
+            'Khong Guan Assorted', 'Richeese Nabati', 'Wafer Tango', 'Biskuit Marie Regal',
+            'Kacang Garuda', 'Kacang Dua Kelinci', 'Sukro Original', 'Kacang Atom',
+            'Kopi Kapal Api', 'Kopi ABC', 'Nescafe Classic', 'Good Day Cappuccino',
+            'Teh Pucuk Harum', 'Teh Kotak Jasmine', 'Ultra Milk Coklat', 'Dancow Fortigro',
+            'Beras Rojo Lele 5kg', 'Beras IR64 5kg', 'Beras Pandan Wangi', 'Tepung Terigu Segitiga',
+            'Gula Pasir Gulaku', 'Garam Halus Kapal', 'Minyak Goreng Bimoli', 'Margarin Blue Band',
+            'Mentega Wijsman', 'Keju Kraft Cheddar'
+          ][i % 50],
+          price: Math.floor(Math.random() * 50000) + 2000,
+          stock: Math.floor(Math.random() * 100) + 5,
+          category: 'makanan',
+          barcode: `8998888${(100000 + i).toString()}`
+        })),
 
-    ...Array.from({ length: 100 }, (_, i) => ({
-      id: `makanan-instant-${i + 1}`,
-      name: [
-        'Rendang Indofood', 'Gulai Ayam Bamboe', 'Soto Ayam Knorr', 'Rawon Indofood',
-        'Gudeg Pronas', 'Opor Ayam Sajiku', 'Sayur Lodeh Indofood', 'Bumbu Nasi Goreng',
-        'Bumbu Ayam Bakar', 'Bumbu Ikan Bakar', 'Sambal Oelek ABC', 'Saos Tiram Panda',
-        'Kecap Manis Bango', 'Kecap Asin Zebra', 'Cuka Dixi', 'Bumbu Sate Indofood'
-      ][i % 16],
-      price: Math.floor(Math.random() * 15000) + 3000,
-      stock: Math.floor(Math.random() * 50) + 10,
-      category: 'makanan'
-    })),
-
-    ...Array.from({ length: 150 }, (_, i) => ({
-      id: `makanan-snack-${i + 1}`,
-      name: [
-        'Permen Kopiko', 'Permen Mentos', 'Chupa Chups', 'Relaxa Mint',
-        'Halls Strawberry', 'Ricola Herbal', 'Fox Candy', 'Alpenliebe',
-        'Coklat Cadbury', 'Toblerone', 'KitKat', 'Snickers',
-        'Wafer Richeese', 'Wafer Superstar', 'Astor Coklat', 'Selamat Biskuit'
-      ][i % 16],
-      price: Math.floor(Math.random() * 25000) + 1000,
-      stock: Math.floor(Math.random() * 80) + 15,
-      category: 'makanan'
-    })),
-
-    // Minuman (Beverages) - 200 products
-    ...Array.from({ length: 80 }, (_, i) => ({
-      id: `minuman-ringan-${i + 1}`,
-      name: [
-        'Coca Cola 330ml', 'Pepsi 330ml', 'Sprite 330ml', 'Fanta Orange 330ml',
-        'Aqua 600ml', 'Le Minerale 600ml', 'Vit 600ml', 'Club 600ml',
-        'Teh Botol Sosro', 'Teh Pucuk 350ml', 'Fruit Tea Apple', 'Green Sands',
-        'Pocari Sweat', 'Mizone Apple', 'Revive Isotonic', 'Hydro Coco',
-        'Nu Green Tea', 'Ichitan Thai Tea', 'Okky Jelly Drink', 'Mogu Mogu'
-      ][i % 20],
-      price: Math.floor(Math.random() * 8000) + 2000,
-      stock: Math.floor(Math.random() * 100) + 20,
-      category: 'minuman'
-    })),
-
-    ...Array.from({ length: 60 }, (_, i) => ({
-      id: `minuman-susu-${i + 1}`,
-      name: [
-        'Ultra Milk Coklat 250ml', 'Ultra Milk Strawberry', 'Indomilk Plain',
-        'Greenfields UHT', 'Diamond UHT', 'Frisian Flag Coklat',
-        'Bear Brand', 'Yakult Original', 'Calpico Original', 'Milkuat Coklat'
-      ][i % 10],
-      price: Math.floor(Math.random() * 12000) + 3000,
-      stock: Math.floor(Math.random() * 60) + 15,
-      category: 'minuman'
-    })),
-
-    ...Array.from({ length: 60 }, (_, i) => ({
-      id: `minuman-kopi-${i + 1}`,
-      name: [
-        'Kopi Luwak White Coffee', 'Nescafe 3in1', 'Kopiko 78', 'ABC Susu',
-        'Kapal Api Special', 'Indocafe Coffeemix', 'Top Coffee', 'Good Day Mocca'
-      ][i % 8],
-      price: Math.floor(Math.random() * 20000) + 5000,
-      stock: Math.floor(Math.random() * 40) + 10,
-      category: 'minuman'
-    })),
-
-    // Kebersihan (Cleaning & Personal Care) - 200 products
-    ...Array.from({ length: 50 }, (_, i) => ({
-      id: `kebersihan-sabun-${i + 1}`,
-      name: [
-        'Sabun Lifebuoy', 'Sabun Dettol', 'Sabun Lux', 'Sabun Dove',
-        'Sabun Nuvo', 'Sabun Citra', 'Sabun GIV', 'Sabun Shinzui'
-      ][i % 8],
-      price: Math.floor(Math.random() * 15000) + 3000,
-      stock: Math.floor(Math.random() * 50) + 8,
-      category: 'kebersihan'
-    })),
-
-    ...Array.from({ length: 40 }, (_, i) => ({
-      id: `kebersihan-shampo-${i + 1}`,
-      name: [
-        'Shampo Clear Men', 'Shampo Pantene', 'Shampo Head & Shoulders',
-        'Shampo Sunsilk', 'Shampo Dove', 'Shampo TRESemme', 'Shampo Matrix'
-      ][i % 7],
-      price: Math.floor(Math.random() * 30000) + 8000,
-      stock: Math.floor(Math.random() * 30) + 5,
-      category: 'kebersihan'
-    })),
-
-    ...Array.from({ length: 40 }, (_, i) => ({
-      id: `kebersihan-pasta-gigi-${i + 1}`,
-      name: [
-        'Pasta Gigi Pepsodent', 'Pasta Gigi Closeup', 'Pasta Gigi Sensodyne',
-        'Pasta Gigi Formula', 'Pasta Gigi Ciptadent', 'Pasta Gigi Enzim'
-      ][i % 6],
-      price: Math.floor(Math.random() * 20000) + 5000,
-      stock: Math.floor(Math.random() * 40) + 8,
-      category: 'kebersihan'
-    })),
-
-    ...Array.from({ length: 70 }, (_, i) => ({
-      id: `kebersihan-deterjen-${i + 1}`,
-      name: [
-        'Rinso Anti Noda', 'Attack Easy', 'Surf Excel', 'Daia Deterjen',
-        'Soklin Liquid', 'Molto Ultra', 'Downy Antibac', 'Wipol Karbol'
-      ][i % 8],
-      price: Math.floor(Math.random() * 25000) + 8000,
-      stock: Math.floor(Math.random() * 25) + 5,
-      category: 'kebersihan'
-    })),
-
-    // Sembako (Staples) - 150 products
-    ...Array.from({ length: 50 }, (_, i) => ({
-      id: `sembako-beras-${i + 1}`,
-      name: [
-        'Beras Cap Jago 5kg', 'Beras Rojo Lele 5kg', 'Beras Pandan Wangi 5kg',
-        'Beras IR64 Premium', 'Beras Maknyus 5kg', 'Beras Setra Ramos'
-      ][i % 6],
-      price: Math.floor(Math.random() * 30000) + 50000,
-      stock: Math.floor(Math.random() * 20) + 5,
-      category: 'sembako'
-    })),
-
-    ...Array.from({ length: 30 }, (_, i) => ({
-      id: `sembako-minyak-${i + 1}`,
-      name: [
-        'Minyak Goreng Bimoli 1L', 'Minyak Goreng Tropical 1L', 'Minyak Goreng Filma 1L',
-        'Minyak Goreng Sania 1L', 'Minyak Kelapa Barco', 'Minyak Zaitun Borges'
-      ][i % 6],
-      price: Math.floor(Math.random() * 10000) + 15000,
-      stock: Math.floor(Math.random() * 30) + 8,
-      category: 'sembako'
-    })),
-
-    ...Array.from({ length: 40 }, (_, i) => ({
-      id: `sembako-tepung-${i + 1}`,
-      name: [
-        'Tepung Terigu Segitiga Biru', 'Tepung Beras Rose Brand', 'Tepung Maizena Honig',
-        'Tepung Tapioka', 'Tepung Bumbu Sajiku', 'Tepung Roti Panko'
-      ][i % 6],
-      price: Math.floor(Math.random() * 8000) + 5000,
-      stock: Math.floor(Math.random() * 40) + 10,
-      category: 'sembako'
-    })),
-
-    ...Array.from({ length: 30 }, (_, i) => ({
-      id: `sembako-gula-garam-${i + 1}`,
-      name: [
-        'Gula Pasir Gulaku 1kg', 'Gula Merah Jawa', 'Garam Halus Kapal',
-        'Garam Beryodium Dolphin', 'Gula Aren Asli', 'Garam Dapur Refina'
-      ][i % 6],
-      price: Math.floor(Math.random() * 8000) + 12000,
-      stock: Math.floor(Math.random() * 35) + 10,
-      category: 'sembako'
-    })),
-
-    // Rokok (Cigarettes) - 100 products
-    ...Array.from({ length: 100 }, (_, i) => ({
-      id: `rokok-${i + 1}`,
-      name: [
-        'Gudang Garam Surya 12', 'Djarum Super 12', 'Sampoerna Mild 16',
-        'Marlboro Red 20', 'LA Bold 16', 'Class Mild 16',
-        'Dji Sam Soe 234', 'Bentoel Biru', 'Surya Pro Mild', 'Esse Pop'
-      ][i % 10],
-      price: Math.floor(Math.random() * 10000) + 18000,
-      stock: Math.floor(Math.random() * 50) + 10,
-      category: 'rokok'
-    })),
-
-    // Alat Tulis (Stationery) - 50 products
-    ...Array.from({ length: 50 }, (_, i) => ({
-      id: `alat-tulis-${i + 1}`,
-      name: [
-        'Pulpen Standard AE7', 'Pensil 2B Faber Castell', 'Penghapus Steadtler',
-        'Buku Tulis Sinar Dunia', 'Penggaris 30cm', 'Spidol Snowman',
-        'Kertas HVS A4', 'Lem Fox', 'Gunting Kenko', 'Stapler Kenko'
-      ][i % 10],
-      price: Math.floor(Math.random() * 15000) + 2000,
-      stock: Math.floor(Math.random() * 60) + 15,
-      category: 'alat-tulis'
-    }))
-  ];
+        // ... other product categories
+      ];
+      
+      globalProducts = generatedProducts;
+    }
+    
+    setProducts(globalProducts);
+  }, []);
 
   const categories = ['semua', 'makanan', 'minuman', 'kebersihan', 'sembako', 'rokok', 'alat-tulis'];
 
+  // Calculate product counts per category
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = { semua: products.length };
     categories.forEach(category => {
@@ -252,15 +93,75 @@ const StockView = () => {
     });
   }, [products, searchQuery, selectedCategory]);
 
-  const lowStockProducts = products.filter(p => p.stock <= 10);
+  const lowStockProducts = useMemo(() => {
+    return products.filter(p => p.stock <= 10);
+  }, [products]);
 
   const handleEditProduct = (product: Product) => {
     setSelectedProduct(product);
     setShowEditModal(true);
   };
 
+  const handleProductUpdate = (updatedProduct: Product) => {
+    // Update local products state
+    const updatedProducts = products.map(p => 
+      p.id === updatedProduct.id ? updatedProduct : p
+    );
+    
+    setProducts(updatedProducts);
+    
+    // Update global products state
+    globalProducts = updatedProducts;
+    
+    setShowEditModal(false);
+    
+    toast({
+      title: "Produk Diperbarui",
+      description: `${updatedProduct.name} telah diperbarui`
+    });
+  };
+
+  const handleAddProduct = (newProduct: Product) => {
+    const productWithId = {
+      ...newProduct,
+      id: `product-${Date.now()}`,
+    };
+    
+    // Update local products state
+    setProducts(prevProducts => [...prevProducts, productWithId]);
+    
+    // Update global products state
+    globalProducts = [...globalProducts, productWithId];
+    
+    setShowAddModal(false);
+    
+    toast({
+      title: "Produk Ditambahkan",
+      description: `${newProduct.name} telah ditambahkan`
+    });
+  };
+
+  const handleBarcodeScanned = (barcode: string) => {
+    const product = products.find(p => p.barcode === barcode);
+    if (product) {
+      setSelectedProduct(product);
+      setShowEditModal(true);
+      toast({
+        title: "Produk Ditemukan",
+        description: `${product.name} siap untuk diedit`
+      });
+    } else {
+      toast({
+        title: "Produk Tidak Ditemukan",
+        description: `Barcode ${barcode} tidak terdaftar`,
+        variant: "destructive"
+      });
+    }
+    setShowScanner(false);
+  };
+
   const getStockStatus = (stock: number) => {
-    if (stock <= 5) return { label: 'Habis', color: 'bg-red-500' };
+    if (stock <= 0) return { label: 'Habis', color: 'bg-red-500' };
     if (stock <= 10) return { label: 'Sedikit', color: 'bg-yellow-500' };
     if (stock <= 50) return { label: 'Normal', color: 'bg-blue-500' };
     return { label: 'Banyak', color: 'bg-green-500' };
@@ -307,6 +208,7 @@ const StockView = () => {
             <Button 
               variant="outline" 
               className="h-12 px-4 rounded-xl border-gray-200 hover:bg-gray-50"
+              onClick={() => setShowScanner(true)}
             >
               <Scan className="w-5 h-5" />
             </Button>
@@ -350,12 +252,26 @@ const StockView = () => {
             <Card key={product.id} className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <h3 className="font-medium text-foreground line-clamp-2 mb-1">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Rp {product.price.toLocaleString('id-ID')}
-                  </p>
+                  <div className="flex items-center">
+                    {product.image && (
+                      <div className="w-12 h-12 rounded bg-gray-100 mr-3 overflow-hidden">
+                        <img 
+                          src={product.image} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-medium text-foreground line-clamp-2 mb-1">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Rp {product.price.toLocaleString('id-ID')}
+                        {product.barcode && <span className="ml-2 text-xs text-gray-400">({product.barcode})</span>}
+                      </p>
+                    </div>
+                  </div>
                   <div className="flex items-center space-x-2">
                     <Badge 
                       variant="secondary" 
@@ -401,6 +317,7 @@ const StockView = () => {
       <AddProductModal 
         isOpen={showAddModal} 
         onClose={() => setShowAddModal(false)} 
+        onAddProduct={handleAddProduct}
       />
       
       {selectedProduct && (
@@ -408,6 +325,16 @@ const StockView = () => {
           isOpen={showEditModal} 
           onClose={() => setShowEditModal(false)}
           product={selectedProduct}
+          onSave={handleProductUpdate}
+        />
+      )}
+      
+      {/* Barcode Scanner Modal */}
+      {showScanner && (
+        <BarcodeScanner
+          isOpen={showScanner}
+          onClose={() => setShowScanner(false)}
+          onBarcodeScanned={handleBarcodeScanned}
         />
       )}
     </div>

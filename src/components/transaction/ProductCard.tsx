@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Minus, AlertTriangle, Package } from 'lucide-react';
+import { Plus, Minus, AlertTriangle, Package, Trash2 } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -24,9 +24,10 @@ interface ProductCardProps {
   cartItem?: CartItem;
   onAddToCart: (product: Product) => void;
   onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemoveFromCart?: (productId: string) => void;
 }
 
-const ProductCard = ({ product, cartItem, onAddToCart, onUpdateQuantity }: ProductCardProps) => {
+const ProductCard = ({ product, cartItem, onAddToCart, onUpdateQuantity, onRemoveFromCart }: ProductCardProps) => {
   const isLowStock = product.stock <= 5;
   const isOutOfStock = product.stock <= 0;
 
@@ -95,35 +96,49 @@ const ProductCard = ({ product, cartItem, onAddToCart, onUpdateQuantity }: Produ
 
         {/* Add to Cart or Quantity Controls */}
         {cartItem ? (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onUpdateQuantity(product.id, cartItem.quantity - 1)}
-                className="w-8 h-8 p-0 rounded-full border-primary/20 hover:bg-primary/10"
-                disabled={cartItem.quantity <= 1}
-              >
-                <Minus className="w-4 h-4" />
-              </Button>
-              <span className="font-semibold text-lg w-8 text-center">
-                {cartItem.quantity}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onUpdateQuantity(product.id, cartItem.quantity + 1)}
-                className="w-8 h-8 p-0 rounded-full border-primary/20 hover:bg-primary/10"
-                disabled={cartItem.quantity >= product.stock}
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onUpdateQuantity(product.id, cartItem.quantity - 1)}
+                  className="w-8 h-8 p-0 rounded-full border-primary/20 hover:bg-primary/10"
+                  disabled={cartItem.quantity <= 1}
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                <span className="font-semibold text-lg w-8 text-center">
+                  {cartItem.quantity}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onUpdateQuantity(product.id, cartItem.quantity + 1)}
+                  className="w-8 h-8 p-0 rounded-full border-primary/20 hover:bg-primary/10"
+                  disabled={cartItem.quantity >= product.stock}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-primary">
+                  Rp {(cartItem.price * cartItem.quantity).toLocaleString('id-ID')}
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-primary">
-                Rp {(cartItem.price * cartItem.quantity).toLocaleString('id-ID')}
-              </p>
-            </div>
+            
+            {onRemoveFromCart && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemoveFromCart(product.id)}
+                className="w-full text-red-500 hover:bg-red-50 hover:text-red-600 py-1"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Hapus
+              </Button>
+            )}
           </div>
         ) : (
           <Button

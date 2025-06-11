@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +40,21 @@ const DashboardLayout = ({
   const [showStoreSelector, setShowStoreSelector] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Close notifications when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showNotifications && !target.closest('[data-notification-container]')) {
+        setShowNotifications(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications]);
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Selamat Pagi';
@@ -54,10 +69,21 @@ const DashboardLayout = ({
     { id: 'insight' as const, label: 'Insight', icon: BarChart3 },
   ];
 
+  const lowStockProducts = [
+    { id: 1, name: 'Indomie Goreng', stock: 5, time: '2 menit lalu', type: 'warning' },
+    { id: 2, name: 'Aqua 600ml', stock: 8, time: '5 menit lalu', type: 'warning' },
+    { id: 3, name: 'Minyak Goreng Bimoli 1L', stock: 3, time: '10 menit lalu', type: 'danger' },
+  ];
+
   const notifications = [
-    { id: 1, message: 'Stok Indomie Goreng hampir habis', time: '2 menit lalu', type: 'warning' },
-    { id: 2, message: 'Transaksi berhasil - Rp 25.000', time: '5 menit lalu', type: 'success' },
-    { id: 3, message: 'Produk baru ditambahkan', time: '10 menit lalu', type: 'info' },
+    ...lowStockProducts.map(product => ({
+      id: product.id,
+      message: `Stok ${product.name} hampir habis (${product.stock})`,
+      time: product.time,
+      type: product.stock <= 5 ? 'danger' : 'warning'
+    })),
+    { id: 4, message: 'Transaksi berhasil - Rp 25.000', time: '15 menit lalu', type: 'success' },
+    { id: 5, message: 'Produk baru ditambahkan', time: '30 menit lalu', type: 'info' },
   ];
 
   return (
@@ -118,7 +144,7 @@ const DashboardLayout = ({
               </div>
 
               {/* Notifications */}
-              <div className="relative">
+              <div className="relative" data-notification-container>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -130,16 +156,30 @@ const DashboardLayout = ({
                 </Button>
                 
                 {showNotifications && (
-                  <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-apple-lg border border-gray-200 py-2 z-10">
+                  <div className="absolute top-full right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-xl shadow-apple-lg border border-gray-200 py-2 z-10">
                     <div className="px-4 py-2 border-b border-gray-100">
                       <h3 className="font-semibold text-foreground">Notifikasi</h3>
                     </div>
-                    {notifications.map((notif) => (
-                      <div key={notif.id} className="px-4 py-3 hover:bg-gray-50 border-b border-gray-50">
-                        <p className="text-sm text-foreground">{notif.message}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{notif.time}</p>
-                      </div>
-                    ))}
+                    <div className="max-h-[70vh] overflow-y-auto">
+                      {notifications.map((notif) => (
+                        <div 
+                          key={notif.id} 
+                          className={`px-4 py-3 hover:bg-gray-50 border-b border-gray-50`}
+                        >
+                          <div className="flex items-start">
+                            <div className={`w-2 h-2 mt-2 rounded-full mr-2 ${
+                              notif.type === 'danger' ? 'bg-red-500' :
+                              notif.type === 'warning' ? 'bg-yellow-500' :
+                              notif.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                            }`} />
+                            <div className="flex-1 pr-2">
+                              <p className="text-sm text-foreground">{notif.message}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{notif.time}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -150,10 +190,18 @@ const DashboardLayout = ({
                 onClick={onProfileClick}
                 className="flex items-center space-x-2"
               >
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">
-                    {currentUser.name.charAt(0).toUpperCase()}
-                  </span>
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center overflow-hidden">
+                  {currentUser.avatar ? (
+                    <img 
+                      src={currentUser.avatar} 
+                      alt={currentUser.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-sm font-medium">
+                      {currentUser.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
                 <div className="hidden sm:block text-left">
                   <p className="text-sm font-medium text-foreground">{currentUser.name}</p>

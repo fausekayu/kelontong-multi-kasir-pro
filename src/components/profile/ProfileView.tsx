@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ interface User {
   email?: string;
   phone?: string;
   address?: string;
+  avatar?: string;
 }
 
 interface StoreData {
@@ -37,7 +38,8 @@ const ProfileView = ({ currentUser, onUserUpdate, onBack }: ProfileViewProps) =>
     name: currentUser.name,
     email: currentUser.email || 'user@example.com',
     phone: currentUser.phone || '08123456789',
-    address: currentUser.address || 'Jl. Merdeka No. 123, Jakarta'
+    address: currentUser.address || 'Jl. Merdeka No. 123, Jakarta',
+    avatar: currentUser.avatar || ''
   });
   
   const [storeData, setStoreData] = useState<StoreData>({
@@ -47,6 +49,7 @@ const ProfileView = ({ currentUser, onUserUpdate, onBack }: ProfileViewProps) =>
     email: 'toko@example.com'
   });
   
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleSaveProfile = () => {
@@ -56,7 +59,8 @@ const ProfileView = ({ currentUser, onUserUpdate, onBack }: ProfileViewProps) =>
         name: profileData.name,
         email: profileData.email,
         phone: profileData.phone,
-        address: profileData.address
+        address: profileData.address,
+        avatar: profileData.avatar
       };
       onUserUpdate(updatedUser);
     }
@@ -84,6 +88,24 @@ const ProfileView = ({ currentUser, onUserUpdate, onBack }: ProfileViewProps) =>
     });
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileData(prev => ({
+          ...prev,
+          avatar: e.target?.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="space-y-6 pb-6">
       {/* Profile Header */}
@@ -103,17 +125,28 @@ const ProfileView = ({ currentUser, onUserUpdate, onBack }: ProfileViewProps) =>
           <div className="flex items-center space-x-4 flex-1">
             <div className="relative">
               <Avatar className="w-20 h-20">
-                <AvatarImage src="/placeholder.svg" alt="Profile" />
-                <AvatarFallback className="text-lg font-semibold">
-                  {currentUser.name.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
+                {profileData.avatar ? (
+                  <AvatarImage src={profileData.avatar} alt="Profile" />
+                ) : (
+                  <AvatarFallback className="text-lg font-semibold">
+                    {currentUser.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <Button 
                 size="sm" 
                 className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 bg-primary"
+                onClick={triggerFileInput}
               >
                 <Camera className="w-4 h-4" />
               </Button>
+              <input 
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
             </div>
             
             <div className="flex-1">

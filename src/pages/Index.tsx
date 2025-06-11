@@ -7,7 +7,6 @@ import TransactionView from '@/components/transaction/TransactionView';
 import StockView from '@/components/stock/StockView';
 import ProfileView from '@/components/profile/ProfileView';
 import InsightView from '@/components/insight/InsightView';
-import CheckoutModal from '@/components/transaction/CheckoutModal';
 import { Card } from '@/components/ui/card';
 import { Package, User } from 'lucide-react';
 
@@ -16,6 +15,10 @@ interface User {
   role: 'cashier' | 'owner';
   currentStore: string;
   stores?: string[];
+  avatar?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
 }
 
 const Index = () => {
@@ -30,6 +33,8 @@ const Index = () => {
       name: role === 'owner' ? 'Ahmad Sutanto' : 'Siti Nurjannah',
       role,
       currentStore: 'Toko Berkah Jaya',
+      email: email || (role === 'owner' ? 'ahmad@example.com' : 'siti@example.com'),
+      phone: role === 'owner' ? '081234567890' : '081987654321',
       stores: role === 'owner' ? ['Toko Berkah Jaya', 'Toko Sumber Rezeki', 'Toko Maju Terus'] : undefined
     };
     

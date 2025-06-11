@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { CreditCard, Banknote, QrCode, Check, Printer } from 'lucide-react';
+import { CreditCard, Banknote, QrCode, Check, Printer, ShoppingBag } from 'lucide-react';
 
 interface CartItem {
   id: string;
@@ -29,6 +29,7 @@ const CheckoutModal = ({ isOpen, onClose, cart, onPaymentComplete }: CheckoutMod
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPrintingReceipt, setIsPrintingReceipt] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [receiptPrinted, setReceiptPrinted] = useState(false);
   const { toast } = useToast();
 
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -53,16 +54,21 @@ const CheckoutModal = ({ isOpen, onClose, cart, onPaymentComplete }: CheckoutMod
     setTimeout(() => {
       setIsProcessing(false);
       setShowSuccess(true);
-      
-      // Simulate receipt printing
-      if (showSuccess) {
-        setIsPrintingReceipt(true);
-        setTimeout(() => {
-          setIsPrintingReceipt(false);
-          handleComplete();
-        }, 2000);
-      }
     }, 1500);
+  };
+  
+  const handlePrintReceipt = () => {
+    setIsPrintingReceipt(true);
+    
+    // Simulate receipt printing
+    setTimeout(() => {
+      setIsPrintingReceipt(false);
+      setReceiptPrinted(true);
+      toast({
+        title: "Struk Dicetak",
+        description: "Struk pembayaran telah berhasil dicetak"
+      });
+    }, 2000);
   };
   
   const handleComplete = () => {
@@ -83,6 +89,21 @@ const CheckoutModal = ({ isOpen, onClose, cart, onPaymentComplete }: CheckoutMod
     }).format(amount);
   };
 
+  const getCurrentDate = () => {
+    const now = new Date();
+    return now.toLocaleDateString('id-ID', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('id-ID');
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md mx-auto">
@@ -91,7 +112,7 @@ const CheckoutModal = ({ isOpen, onClose, cart, onPaymentComplete }: CheckoutMod
         </DialogHeader>
         
         {showSuccess ? (
-          <div className="py-8 flex flex-col items-center justify-center">
+          <div className="py-6 flex flex-col items-center justify-center">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-4">
               <Check className="w-8 h-8" />
             </div>
@@ -104,13 +125,95 @@ const CheckoutModal = ({ isOpen, onClose, cart, onPaymentComplete }: CheckoutMod
             </p>
             
             {!isPrintingReceipt && (
-              <Button 
-                className="w-full gradient-primary"
-                onClick={handleComplete}
-              >
-                <Printer className="w-4 h-4 mr-2" />
-                Selesai
-              </Button>
+              <>
+                {!receiptPrinted ? (
+                  <Button 
+                    className="w-full gradient-primary mb-4"
+                    onClick={handlePrintReceipt}
+                  >
+                    <Printer className="w-4 h-4 mr-2" />
+                    Cetak Struk
+                  </Button>
+                ) : (
+                  <div className="w-full bg-gray-50 p-4 rounded-lg mb-4 border border-gray-100">
+                    <div className="text-center mb-3">
+                      <h4 className="font-bold">WARLONTAR</h4>
+                      <p className="text-xs text-gray-500">Jl. Raya Bogor No. 456, Depok</p>
+                      <p className="text-xs text-gray-500">Telp: 02187654321</p>
+                    </div>
+                    
+                    <div className="text-xs mb-3 flex justify-between">
+                      <span>{getCurrentDate()}</span>
+                      <span>{getCurrentTime()}</span>
+                    </div>
+                    
+                    <div className="border-t border-dashed border-gray-200 my-2"></div>
+                    
+                    {cart.map((item, idx) => (
+                      <div key={idx} className="text-sm flex justify-between mb-1">
+                        <div>
+                          <div>{item.name} x{item.quantity}</div>
+                          <div className="text-xs text-gray-500">@{formatCurrency(item.price)}</div>
+                        </div>
+                        <div className="font-medium">{formatCurrency(item.price * item.quantity)}</div>
+                      </div>
+                    ))}
+                    
+                    <div className="border-t border-dashed border-gray-200 my-2"></div>
+                    
+                    <div className="text-sm flex justify-between">
+                      <span>Subtotal:</span>
+                      <span>{formatCurrency(subtotal)}</span>
+                    </div>
+                    <div className="text-sm flex justify-between">
+                      <span>PPN (10%):</span>
+                      <span>{formatCurrency(tax)}</span>
+                    </div>
+                    <div className="text-sm font-bold flex justify-between mt-1">
+                      <span>Total:</span>
+                      <span>{formatCurrency(total)}</span>
+                    </div>
+                    
+                    <div className="border-t border-dashed border-gray-200 my-2"></div>
+                    
+                    <div className="text-sm flex justify-between">
+                      <span>Metode Pembayaran:</span>
+                      <span>
+                        {paymentMethod === 'cash' ? 'Tunai' : paymentMethod === 'qris' ? 'QRIS' : 'Kartu Debit'}
+                      </span>
+                    </div>
+                    
+                    {paymentMethod === 'cash' && cashAmount && (
+                      <>
+                        <div className="text-sm flex justify-between">
+                          <span>Dibayar:</span>
+                          <span>{formatCurrency(parseFloat(cashAmount))}</span>
+                        </div>
+                        <div className="text-sm flex justify-between">
+                          <span>Kembali:</span>
+                          <span>{formatCurrency(change)}</span>
+                        </div>
+                      </>
+                    )}
+                    
+                    <div className="border-t border-dashed border-gray-200 my-2"></div>
+                    
+                    <div className="text-center text-xs">
+                      <p>Terima kasih atas kunjungan Anda</p>
+                      <p>Simpan struk ini sebagai bukti pembayaran</p>
+                    </div>
+                  </div>
+                )}
+                
+                <Button 
+                  className="w-full"
+                  variant="outline"
+                  onClick={handleComplete}
+                >
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Selesai
+                </Button>
+              </>
             )}
           </div>
         ) : (
