@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AuthLayout from '@/components/auth/AuthLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -236,7 +235,7 @@ const Index = () => {
         <ProfileView
           currentUser={currentUser}
           onBack={() => setShowProfile(false)}
-          onUpdateUser={handleUpdateUser}
+          onUserUpdate={handleUpdateUser}
         />
       ) : (
         <DashboardLayout

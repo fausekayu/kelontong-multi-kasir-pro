@@ -203,7 +203,6 @@ const StockView = ({ products, onUpdateProducts }: StockViewProps) => {
       <AddProductModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSubmit={handleAddProduct}
       />
 
       {editingProduct && (
@@ -219,7 +218,7 @@ const StockView = ({ products, onUpdateProducts }: StockViewProps) => {
         <BarcodeScanner
           isOpen={showScanner}
           onClose={() => setShowScanner(false)}
-          onScan={handleScanResult}
+          onBarcodeScanned={handleScanResult}
         />
       )}
     </div>

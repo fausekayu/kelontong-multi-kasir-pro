@@ -7,12 +7,24 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  category: string;
+  sku: string;
+  barcode: string;
+  image?: string;
+}
+
 interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit?: (newProduct: Omit<Product, 'id'>) => void;
 }
 
-const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
+const AddProductModal = ({ isOpen, onClose, onSubmit }: AddProductModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -28,6 +40,19 @@ const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    const newProduct = {
+      name: formData.name,
+      price: Number(formData.price),
+      stock: Number(formData.stock),
+      category: formData.category,
+      sku: `SKU-${Date.now()}`,
+      barcode: formData.barcode || `${Date.now()}`,
+    };
+
+    if (onSubmit) {
+      onSubmit(newProduct);
+    }
 
     // Simulate API call
     setTimeout(() => {
