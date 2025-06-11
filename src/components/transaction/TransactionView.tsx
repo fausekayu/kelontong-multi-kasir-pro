@@ -24,6 +24,26 @@ interface CartItem extends Product {
   quantity: number;
 }
 
+interface SaleHistoryItem {
+  id: string;
+  date: string;
+  time: string;
+  items: {
+    name: string;
+    quantity: number;
+    price: number;
+  }[];
+  total: number;
+  paymentMethod: string;
+}
+
+interface TransactionViewProps {
+  products: Product[];
+  onUpdateProducts: (products: Product[]) => void;
+  saleHistory: SaleHistoryItem[];
+  onUpdateSaleHistory: (saleHistory: SaleHistoryItem[]) => void;
+}
+
 // Global product data store - simulating backend storage
 let globalProducts: Product[] = [
   // Makanan (Food) - 300 products
@@ -233,13 +253,12 @@ function getProductImage(name: string): string {
   return productImages[name] || 'https://images.unsplash.com/photo-1613920346957-c9a2db5a75d4?auto=format&fit=crop&w=800&q=80';
 }
 
-const TransactionView = () => {
+const TransactionView = ({ products, onUpdateProducts, saleHistory, onUpdateSaleHistory }: TransactionViewProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('semua');
   const [showCheckout, setShowCheckout] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
-  const [products, setProducts] = useState<Product[]>(globalProducts);
   const { toast } = useToast();
 
   const categories = ['semua', 'makanan', 'minuman', 'kebersihan', 'sembako', 'rokok', 'alat-tulis'];
@@ -313,14 +332,29 @@ const TransactionView = () => {
       return product;
     });
     
-    setProducts(updatedProducts);
-    // Update global products state
-    globalProducts = updatedProducts;
+    onUpdateProducts(updatedProducts);
   };
 
   const handlePaymentComplete = (paymentMethod: string) => {
     // Update product stock
     updateProductStock(cart);
+    
+    // Create new sale history item
+    const newSaleItem: SaleHistoryItem = {
+      id: `TRX-${Date.now()}`,
+      date: new Date().toLocaleDateString('id-ID'),
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      items: cart.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      paymentMethod: paymentMethod
+    };
+    
+    // Update sale history
+    onUpdateSaleHistory([newSaleItem, ...saleHistory]);
     
     toast({
       title: "Transaksi Berhasil",
@@ -478,3 +512,5 @@ const TransactionView = () => {
 };
 
 export default TransactionView;
+
+}
