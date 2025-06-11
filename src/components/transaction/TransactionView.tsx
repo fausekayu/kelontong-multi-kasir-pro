@@ -514,5 +514,3 @@ const TransactionView = ({ products, onUpdateProducts, saleHistory, onUpdateSale
 };
 
 export default TransactionView;
-
-}
