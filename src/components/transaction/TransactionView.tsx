@@ -16,7 +16,8 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  barcode?: string;
+  sku: string;
+  barcode: string;
   image?: string;
 }
 
@@ -70,6 +71,7 @@ let globalProducts: Product[] = [
       price: Math.floor(Math.random() * 50000) + 2000,
       stock: Math.floor(Math.random() * 100) + 5,
       category: 'makanan',
+      sku: `SKU-${i + 1}`,
       barcode: `8998888${(100000 + i).toString()}`,
       image: getProductImage(name)
     }
@@ -512,3 +514,5 @@ const TransactionView = ({ products, onUpdateProducts, saleHistory, onUpdateSale
 };
 
 export default TransactionView;
+
+}
