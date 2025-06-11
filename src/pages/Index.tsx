@@ -1,6 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useSession, signIn, signOut } from 'next-auth/react';
 import AuthLayout from '@/components/auth/AuthLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import TransactionView from '@/components/transaction/TransactionView';
@@ -34,8 +33,7 @@ interface SaleHistoryItem {
 }
 
 const Index = () => {
-  const { data: session } = useSession();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Set to true for demo
   const [showProfile, setShowProfile] = useState(false);
   const [activeTab, setActiveTab] = useState<'transaction' | 'stock' | 'insight'>('transaction');
   const [currentUser, setCurrentUser] = useState({
@@ -210,22 +208,12 @@ const Index = () => {
     }
   ]);
 
-  useEffect(() => {
-    if (session?.user) {
-      setIsAuthenticated(true);
-      // Here you might also fetch user-specific data and update currentUser
-    } else {
-      setIsAuthenticated(false);
-    }
-  }, [session]);
-
   const handleLogin = async (credentials: any) => {
-    // Implement your login logic here, e.g., using next-auth signIn
-    signIn('credentials', credentials);
+    // Simple demo login
+    setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
-    signOut();
     setIsAuthenticated(false);
   };
 
@@ -241,10 +229,12 @@ const Index = () => {
   return (
     <div className="h-screen">
       {!isAuthenticated ? (
-        <AuthLayout onLogin={handleLogin} />
+        <AuthLayout title="Login" subtitle="Masuk ke sistem kasir">
+          <div>Login form would go here</div>
+        </AuthLayout>
       ) : showProfile ? (
         <ProfileView
-          user={currentUser}
+          currentUser={currentUser}
           onBack={() => setShowProfile(false)}
           onUpdateUser={handleUpdateUser}
         />
