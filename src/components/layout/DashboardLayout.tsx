@@ -23,8 +23,8 @@ interface DashboardLayoutProps {
     currentStore: string;
     stores?: string[];
   };
-  activeTab: 'transaction' | 'stock' | 'profile';
-  onTabChange: (tab: 'transaction' | 'stock' | 'profile') => void;
+  activeTab: 'transaction' | 'stock' | 'insight';
+  onTabChange: (tab: 'transaction' | 'stock' | 'insight') => void;
   onStoreChange?: (store: string) => void;
   onProfileClick?: () => void;
 }
