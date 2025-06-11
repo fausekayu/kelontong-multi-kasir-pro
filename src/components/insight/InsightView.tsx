@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +7,10 @@ import {
   DollarSign, 
   ShoppingCart, 
   TrendingUp,
-  Calendar
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  Package
 } from 'lucide-react';
 import {
   BarChart,
@@ -22,6 +24,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { Button } from '@/components/ui/button';
 
 interface SaleData {
   name: string;
@@ -45,12 +48,44 @@ interface InsightViewProps {
   saleHistory?: SaleHistoryItem[];
 }
 
+interface ProductSale {
+  name: string;
+  quantity: number;
+  transactions: number;
+  revenue: number;
+}
+
+interface DayDetail {
+  date: string;
+  transactions: number;
+  revenue: number;
+  products: ProductSale[];
+}
+
+interface WeekDetail {
+  weekNumber: number;
+  weekRange: string;
+  transactions: number;
+  revenue: number;
+  days: DayDetail[];
+  topProduct: string;
+}
+
+interface MonthDetail {
+  month: string;
+  monthNumber: number;
+  transactions: number;
+  revenue: number;
+  weeks: WeekDetail[];
+  topProduct: string;
+}
+
 const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [chartPeriod, setChartPeriod] = useState('daily');
   const [salesRecapPeriod, setSalesRecapPeriod] = useState('daily');
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
-  // Sample data for charts - different time periods
   const dailySales = [
     { period: "Sen", amount: 950000 },
     { period: "Sel", amount: 820000 },
@@ -101,39 +136,183 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
     }
   };
 
-  // Sample sales recap data
-  const dailyRecap = [
-    { id: '1', period: '11 Jun 2025', transactions: 25, revenue: 2450000, topProduct: 'Indomie Goreng' },
-    { id: '2', period: '10 Jun 2025', transactions: 32, revenue: 3100000, topProduct: 'Aqua 600ml' },
-    { id: '3', period: '09 Jun 2025', transactions: 28, revenue: 2780000, topProduct: 'Beras Cap Jago 5kg' },
+  // Detailed sales recap data with product breakdown
+  const dailyDetailedRecap: DayDetail[] = [
+    {
+      date: '11 Jun 2025',
+      transactions: 25,
+      revenue: 2450000,
+      products: [
+        { name: 'Indomie Goreng', quantity: 45, transactions: 12, revenue: 157500 },
+        { name: 'Aqua 600ml', quantity: 38, transactions: 15, revenue: 190000 },
+        { name: 'Coca Cola 330ml', quantity: 25, transactions: 8, revenue: 150000 },
+        { name: 'Beras Cap Jago 5kg', quantity: 8, transactions: 6, revenue: 520000 },
+        { name: 'Minyak Goreng Bimoli 1L', quantity: 15, transactions: 9, revenue: 375000 }
+      ]
+    },
+    {
+      date: '10 Jun 2025',
+      transactions: 32,
+      revenue: 3100000,
+      products: [
+        { name: 'Aqua 600ml', quantity: 52, transactions: 18, revenue: 260000 },
+        { name: 'Indomie Goreng', quantity: 48, transactions: 16, revenue: 168000 },
+        { name: 'Teh Botol Sosro', quantity: 28, transactions: 12, revenue: 196000 },
+        { name: 'Shampo Clear Men', quantity: 12, transactions: 8, revenue: 342000 },
+        { name: 'Gula Pasir Gulaku 1kg', quantity: 18, transactions: 10, revenue: 324000 }
+      ]
+    },
+    {
+      date: '09 Jun 2025',
+      transactions: 28,
+      revenue: 2780000,
+      products: [
+        { name: 'Beras Cap Jago 5kg', quantity: 12, transactions: 8, revenue: 780000 },
+        { name: 'Indomie Goreng', quantity: 42, transactions: 14, revenue: 147000 },
+        { name: 'Minyak Goreng Bimoli 1L', quantity: 20, transactions: 12, revenue: 500000 },
+        { name: 'Sabun Lifebuoy', quantity: 35, transactions: 15, revenue: 140000 },
+        { name: 'Pocari Sweat', quantity: 22, transactions: 9, revenue: 176000 }
+      ]
+    }
   ];
 
-  const weeklyRecap = [
-    { id: '1', period: 'Minggu 1 Jun 2025', transactions: 165, revenue: 15500000, topProduct: 'Indomie Goreng' },
-    { id: '2', period: 'Minggu 4 May 2025', transactions: 142, revenue: 13200000, topProduct: 'Aqua 600ml' },
-    { id: '3', period: 'Minggu 3 May 2025', transactions: 158, revenue: 14800000, topProduct: 'Minyak Goreng Bimoli 1L' },
+  const weeklyDetailedRecap: WeekDetail[] = [
+    {
+      weekNumber: 1,
+      weekRange: '09-15 Jun 2025',
+      transactions: 165,
+      revenue: 15500000,
+      topProduct: 'Indomie Goreng',
+      days: [
+        {
+          date: '09 Jun 2025',
+          transactions: 28,
+          revenue: 2780000,
+          products: [
+            { name: 'Beras Cap Jago 5kg', quantity: 12, transactions: 8, revenue: 780000 },
+            { name: 'Indomie Goreng', quantity: 42, transactions: 14, revenue: 147000 },
+            { name: 'Minyak Goreng Bimoli 1L', quantity: 20, transactions: 12, revenue: 500000 }
+          ]
+        },
+        {
+          date: '10 Jun 2025',
+          transactions: 32,
+          revenue: 3100000,
+          products: [
+            { name: 'Aqua 600ml', quantity: 52, transactions: 18, revenue: 260000 },
+            { name: 'Indomie Goreng', quantity: 48, transactions: 16, revenue: 168000 },
+            { name: 'Teh Botol Sosro', quantity: 28, transactions: 12, revenue: 196000 }
+          ]
+        },
+        {
+          date: '11 Jun 2025',
+          transactions: 25,
+          revenue: 2450000,
+          products: [
+            { name: 'Indomie Goreng', quantity: 45, transactions: 12, revenue: 157500 },
+            { name: 'Aqua 600ml', quantity: 38, transactions: 15, revenue: 190000 },
+            { name: 'Coca Cola 330ml', quantity: 25, transactions: 8, revenue: 150000 }
+          ]
+        }
+      ]
+    }
   ];
 
-  const monthlyRecap = [
-    { id: '1', period: 'Juni 2025', transactions: 650, revenue: 65000000, topProduct: 'Indomie Goreng' },
-    { id: '2', period: 'Mei 2025', transactions: 580, revenue: 57000000, topProduct: 'Aqua 600ml' },
-    { id: '3', period: 'April 2025', transactions: 610, revenue: 61000000, topProduct: 'Beras Cap Jago 5kg' },
+  const monthlyDetailedRecap: MonthDetail[] = [
+    {
+      month: 'Juni 2025',
+      monthNumber: 6,
+      transactions: 650,
+      revenue: 65000000,
+      topProduct: 'Indomie Goreng',
+      weeks: [
+        {
+          weekNumber: 1,
+          weekRange: '02-08 Jun 2025',
+          transactions: 158,
+          revenue: 14800000,
+          topProduct: 'Beras Cap Jago 5kg',
+          days: [
+            {
+              date: '02 Jun 2025',
+              transactions: 22,
+              revenue: 2100000,
+              products: [
+                { name: 'Beras Cap Jago 5kg', quantity: 8, transactions: 6, revenue: 520000 },
+                { name: 'Indomie Goreng', quantity: 35, transactions: 12, revenue: 122500 }
+              ]
+            }
+          ]
+        },
+        {
+          weekNumber: 2,
+          weekRange: '09-15 Jun 2025',
+          transactions: 165,
+          revenue: 15500000,
+          topProduct: 'Indomie Goreng',
+          days: weeklyDetailedRecap[0].days
+        }
+      ]
+    }
   ];
 
-  const yearlyRecap = [
-    { id: '1', period: '2025', transactions: 7800, revenue: 920000000, topProduct: 'Indomie Goreng' },
-    { id: '2', period: '2024', transactions: 6500, revenue: 850000000, topProduct: 'Aqua 600ml' },
-    { id: '3', period: '2023', transactions: 5200, revenue: 780000000, topProduct: 'Beras Cap Jago 5kg' },
+  const yearlyDetailedRecap = [
+    {
+      year: '2025',
+      transactions: 7800,
+      revenue: 920000000,
+      topProduct: 'Indomie Goreng',
+      months: [
+        {
+          month: 'Januari 2025',
+          transactions: 580,
+          revenue: 65000000,
+          topProduct: 'Aqua 600ml',
+          weeks: [
+            {
+              weekRange: '01-07 Jan 2025',
+              transactions: 145,
+              revenue: 16250000,
+              days: [
+                {
+                  date: '01 Jan 2025',
+                  transactions: 20,
+                  revenue: 2300000,
+                  products: [
+                    { name: 'Aqua 600ml', quantity: 45, transactions: 15, revenue: 225000 },
+                    { name: 'Indomie Goreng', quantity: 38, transactions: 12, revenue: 133000 }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          month: 'Juni 2025',
+          transactions: 650,
+          revenue: 65000000,
+          topProduct: 'Indomie Goreng',
+          weeks: monthlyDetailedRecap[0].weeks
+        }
+      ]
+    }
   ];
 
   const getSalesRecapData = () => {
     switch (salesRecapPeriod) {
-      case 'daily': return dailyRecap;
-      case 'weekly': return weeklyRecap;
-      case 'monthly': return monthlyRecap;
-      case 'yearly': return yearlyRecap;
-      default: return dailyRecap;
+      case 'daily': return dailyDetailedRecap;
+      case 'weekly': return weeklyDetailedRecap;
+      case 'monthly': return monthlyDetailedRecap;
+      case 'yearly': return yearlyDetailedRecap;
+      default: return dailyDetailedRecap;
     }
+  };
+
+  const toggleExpanded = (id: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
   const topProducts: SaleData[] = [
@@ -163,6 +342,371 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
   const dailyRevenue = saleHistory.reduce((total, sale) => total + sale.total, 0);
   const dailyTransactions = saleHistory.length;
   const avgTransactionValue = dailyTransactions > 0 ? dailyRevenue / dailyTransactions : 0;
+
+  const renderProductList = (products: ProductSale[]) => (
+    <div className="mt-3 space-y-2">
+      <h4 className="text-sm font-medium text-muted-foreground flex items-center">
+        <Package className="w-4 h-4 mr-1" />
+        Produk Terjual
+      </h4>
+      {products.map((product, idx) => (
+        <div key={idx} className="flex justify-between items-center p-2 bg-muted/30 rounded-lg">
+          <div>
+            <p className="text-sm font-medium">{product.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {product.quantity} pcs • {product.transactions} transaksi
+            </p>
+          </div>
+          <span className="text-sm font-semibold text-primary">
+            {formatCurrency(product.revenue)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderDailyRecap = () => (
+    <div className="space-y-4">
+      {(getSalesRecapData() as DayDetail[]).map((day) => (
+        <Card key={day.date} className="p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <span className="font-medium text-lg">{day.date}</span>
+              <p className="text-sm text-muted-foreground">
+                {day.transactions} transaksi
+              </p>
+            </div>
+            <Badge variant="outline">
+              {formatCurrency(day.revenue)}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 text-center mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Transaksi</p>
+              <p className="font-semibold">{day.transactions}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Rata-rata per Transaksi</p>
+              <p className="font-semibold">{formatCurrency(day.revenue / day.transactions)}</p>
+            </div>
+          </div>
+          
+          {renderProductList(day.products)}
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderWeeklyRecap = () => (
+    <div className="space-y-4">
+      {(getSalesRecapData() as WeekDetail[]).map((week) => (
+        <Card key={week.weekRange} className="p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <span className="font-medium text-lg">Minggu {week.weekNumber}</span>
+              <p className="text-sm text-muted-foreground">
+                {week.weekRange} • {week.transactions} transaksi • Top: {week.topProduct}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline">
+                {formatCurrency(week.revenue)}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleExpanded(`week-${week.weekNumber}`)}
+              >
+                {expandedItems[`week-${week.weekNumber}`] ? 
+                  <ChevronDown className="w-4 h-4" /> : 
+                  <ChevronRight className="w-4 h-4" />
+                }
+              </Button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 text-center mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Transaksi</p>
+              <p className="font-semibold">{week.transactions}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Pendapatan</p>
+              <p className="font-semibold text-primary">{formatCurrency(week.revenue)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Rata-rata per Transaksi</p>
+              <p className="font-semibold">{formatCurrency(week.revenue / week.transactions)}</p>
+            </div>
+          </div>
+
+          {expandedItems[`week-${week.weekNumber}`] && (
+            <div className="mt-4 space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">Detail Harian</h4>
+              {week.days.map((day) => (
+                <div key={day.date} className="p-3 bg-muted/30 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">{day.date}</span>
+                    <span className="text-sm text-primary font-semibold">
+                      {formatCurrency(day.revenue)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {day.transactions} transaksi
+                  </p>
+                  {renderProductList(day.products)}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderMonthlyRecap = () => (
+    <div className="space-y-4">
+      {(getSalesRecapData() as MonthDetail[]).map((month) => (
+        <Card key={month.month} className="p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <span className="font-medium text-lg">{month.month}</span>
+              <p className="text-sm text-muted-foreground">
+                {month.transactions} transaksi • Top: {month.topProduct}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline">
+                {formatCurrency(month.revenue)}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleExpanded(`month-${month.monthNumber}`)}
+              >
+                {expandedItems[`month-${month.monthNumber}`] ? 
+                  <ChevronDown className="w-4 h-4" /> : 
+                  <ChevronRight className="w-4 h-4" />
+                }
+              </Button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 text-center mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Transaksi</p>
+              <p className="font-semibold">{month.transactions}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Pendapatan</p>
+              <p className="font-semibold text-primary">{formatCurrency(month.revenue)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Rata-rata per Transaksi</p>
+              <p className="font-semibold">{formatCurrency(month.revenue / month.transactions)}</p>
+            </div>
+          </div>
+
+          {expandedItems[`month-${month.monthNumber}`] && (
+            <div className="mt-4 space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">Detail Mingguan</h4>
+              {month.weeks.map((week) => (
+                <div key={week.weekRange} className="p-3 bg-muted/30 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <div>
+                      <span className="font-medium">Minggu {week.weekNumber}</span>
+                      <p className="text-xs text-muted-foreground">{week.weekRange}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm text-primary font-semibold">
+                        {formatCurrency(week.revenue)}
+                      </span>
+                      <p className="text-xs text-muted-foreground">{week.transactions} transaksi</p>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-between mt-2"
+                    onClick={() => toggleExpanded(`week-${month.monthNumber}-${week.weekNumber}`)}
+                  >
+                    <span className="text-xs">Lihat Detail Harian</span>
+                    {expandedItems[`week-${month.monthNumber}-${week.weekNumber}`] ? 
+                      <ChevronDown className="w-3 h-3" /> : 
+                      <ChevronRight className="w-3 h-3" />
+                    }
+                  </Button>
+
+                  {expandedItems[`week-${month.monthNumber}-${week.weekNumber}`] && week.days && (
+                    <div className="mt-3 space-y-2">
+                      {week.days.map((day) => (
+                        <div key={day.date} className="p-2 bg-background rounded border">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm font-medium">{day.date}</span>
+                            <span className="text-xs text-primary font-semibold">
+                              {formatCurrency(day.revenue)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            {day.transactions} transaksi
+                          </p>
+                          {renderProductList(day.products)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderYearlyRecap = () => (
+    <div className="space-y-4">
+      {(getSalesRecapData() as any[]).map((year) => (
+        <Card key={year.year} className="p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <span className="font-medium text-lg">{year.year}</span>
+              <p className="text-sm text-muted-foreground">
+                {year.transactions} transaksi • Top: {year.topProduct}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline">
+                {formatCurrency(year.revenue)}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleExpanded(`year-${year.year}`)}
+              >
+                {expandedItems[`year-${year.year}`] ? 
+                  <ChevronDown className="w-4 h-4" /> : 
+                  <ChevronRight className="w-4 h-4" />
+                }
+              </Button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 text-center mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Transaksi</p>
+              <p className="font-semibold">{year.transactions}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Pendapatan</p>
+              <p className="font-semibold text-primary">{formatCurrency(year.revenue)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Rata-rata per Transaksi</p>
+              <p className="font-semibold">{formatCurrency(year.revenue / year.transactions)}</p>
+            </div>
+          </div>
+
+          {expandedItems[`year-${year.year}`] && (
+            <div className="mt-4 space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">Detail Bulanan</h4>
+              {year.months.map((month: any, idx: number) => (
+                <div key={month.month} className="p-3 bg-muted/30 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <div>
+                      <span className="font-medium">{month.month}</span>
+                      <p className="text-xs text-muted-foreground">Top: {month.topProduct}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm text-primary font-semibold">
+                        {formatCurrency(month.revenue)}
+                      </span>
+                      <p className="text-xs text-muted-foreground">{month.transactions} transaksi</p>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-between mt-2"
+                    onClick={() => toggleExpanded(`month-${year.year}-${idx}`)}
+                  >
+                    <span className="text-xs">Lihat Detail Mingguan</span>
+                    {expandedItems[`month-${year.year}-${idx}`] ? 
+                      <ChevronDown className="w-3 h-3" /> : 
+                      <ChevronRight className="w-3 h-3" />
+                    }
+                  </Button>
+
+                  {expandedItems[`month-${year.year}-${idx}`] && month.weeks && (
+                    <div className="mt-3 space-y-2">
+                      {month.weeks.map((week: any) => (
+                        <div key={week.weekRange} className="p-2 bg-background rounded border">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm font-medium">{week.weekRange}</span>
+                            <span className="text-xs text-primary font-semibold">
+                              {formatCurrency(week.revenue)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            {week.transactions} transaksi
+                          </p>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-between"
+                            onClick={() => toggleExpanded(`week-${year.year}-${idx}-${week.weekRange}`)}
+                          >
+                            <span className="text-xs">Lihat Detail Harian</span>
+                            {expandedItems[`week-${year.year}-${idx}-${week.weekRange}`] ? 
+                              <ChevronDown className="w-3 h-3" /> : 
+                              <ChevronRight className="w-3 h-3" />
+                            }
+                          </Button>
+
+                          {expandedItems[`week-${year.year}-${idx}-${week.weekRange}`] && week.days && (
+                            <div className="mt-2 space-y-2">
+                              {week.days.map((day: any) => (
+                                <div key={day.date} className="p-2 bg-muted/20 rounded">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs font-medium">{day.date}</span>
+                                    <span className="text-xs text-primary font-semibold">
+                                      {formatCurrency(day.revenue)}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mb-1">
+                                    {day.transactions} transaksi
+                                  </p>
+                                  {renderProductList(day.products)}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderRecapContent = () => {
+    switch (salesRecapPeriod) {
+      case 'daily': return renderDailyRecap();
+      case 'weekly': return renderWeeklyRecap();
+      case 'monthly': return renderMonthlyRecap();
+      case 'yearly': return renderYearlyRecap();
+      default: return renderDailyRecap();
+    }
+  };
 
   return (
     <div className="space-y-4 pb-6">
@@ -319,38 +863,7 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
                 </Tabs>
               </div>
               
-              <div className="space-y-4">
-                {getSalesRecapData().map((recap) => (
-                  <Card key={recap.id} className="p-4 border border-gray-100">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <span className="font-medium text-lg">{recap.period}</span>
-                        <p className="text-sm text-muted-foreground">
-                          {recap.transactions} transaksi • Produk terlaris: {recap.topProduct}
-                        </p>
-                      </div>
-                      <Badge variant="outline">
-                        {formatCurrency(recap.revenue)}
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Transaksi</p>
-                        <p className="font-semibold">{recap.transactions}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Pendapatan</p>
-                        <p className="font-semibold text-primary">{formatCurrency(recap.revenue)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Rata-rata per Transaksi</p>
-                        <p className="font-semibold">{formatCurrency(recap.revenue / recap.transactions)}</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              {renderRecapContent()}
             </Card>
           </TabsContent>
         </Tabs>
