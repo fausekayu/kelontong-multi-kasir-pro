@@ -89,7 +89,9 @@ let globalProducts: Product[] = [
     ][i % 20],
     price: Math.floor(Math.random() * 8000) + 2000,
     stock: Math.floor(Math.random() * 100) + 20,
-    category: 'minuman'
+    category: 'minuman',
+    sku: `SKU-MR-${i + 1}`,
+    barcode: `8997777${(200000 + i).toString()}`
   })),
 
   ...Array.from({ length: 60 }, (_, i) => ({
@@ -101,7 +103,9 @@ let globalProducts: Product[] = [
     ][i % 10],
     price: Math.floor(Math.random() * 12000) + 3000,
     stock: Math.floor(Math.random() * 60) + 15,
-    category: 'minuman'
+    category: 'minuman',
+    sku: `SKU-MS-${i + 1}`,
+    barcode: `8996666${(300000 + i).toString()}`
   })),
 
   ...Array.from({ length: 60 }, (_, i) => ({
@@ -112,7 +116,9 @@ let globalProducts: Product[] = [
     ][i % 8],
     price: Math.floor(Math.random() * 20000) + 5000,
     stock: Math.floor(Math.random() * 40) + 10,
-    category: 'minuman'
+    category: 'minuman',
+    sku: `SKU-MK-${i + 1}`,
+    barcode: `8995555${(400000 + i).toString()}`
   })),
 
   // Kebersihan (Cleaning & Personal Care) - 200 products
@@ -124,7 +130,9 @@ let globalProducts: Product[] = [
     ][i % 8],
     price: Math.floor(Math.random() * 15000) + 3000,
     stock: Math.floor(Math.random() * 50) + 8,
-    category: 'kebersihan'
+    category: 'kebersihan',
+    sku: `SKU-KS-${i + 1}`,
+    barcode: `8994444${(500000 + i).toString()}`
   })),
 
   ...Array.from({ length: 40 }, (_, i) => ({
@@ -135,7 +143,9 @@ let globalProducts: Product[] = [
     ][i % 7],
     price: Math.floor(Math.random() * 30000) + 8000,
     stock: Math.floor(Math.random() * 30) + 5,
-    category: 'kebersihan'
+    category: 'kebersihan',
+    sku: `SKU-KSH-${i + 1}`,
+    barcode: `8993333${(600000 + i).toString()}`
   })),
 
   ...Array.from({ length: 40 }, (_, i) => ({
@@ -146,7 +156,9 @@ let globalProducts: Product[] = [
     ][i % 6],
     price: Math.floor(Math.random() * 20000) + 5000,
     stock: Math.floor(Math.random() * 40) + 8,
-    category: 'kebersihan'
+    category: 'kebersihan',
+    sku: `SKU-KPG-${i + 1}`,
+    barcode: `8992222${(700000 + i).toString()}`
   })),
 
   ...Array.from({ length: 70 }, (_, i) => ({
@@ -157,7 +169,9 @@ let globalProducts: Product[] = [
     ][i % 8],
     price: Math.floor(Math.random() * 25000) + 8000,
     stock: Math.floor(Math.random() * 25) + 5,
-    category: 'kebersihan'
+    category: 'kebersihan',
+    sku: `SKU-KD-${i + 1}`,
+    barcode: `8991111${(800000 + i).toString()}`
   })),
 
   // Sembako (Staples) - 150 products
@@ -169,7 +183,9 @@ let globalProducts: Product[] = [
     ][i % 6],
     price: Math.floor(Math.random() * 30000) + 50000,
     stock: Math.floor(Math.random() * 20) + 5,
-    category: 'sembako'
+    category: 'sembako',
+    sku: `SKU-SB-${i + 1}`,
+    barcode: `8990000${(900000 + i).toString()}`
   })),
 
   ...Array.from({ length: 30 }, (_, i) => ({
@@ -180,7 +196,9 @@ let globalProducts: Product[] = [
     ][i % 6],
     price: Math.floor(Math.random() * 10000) + 15000,
     stock: Math.floor(Math.random() * 30) + 8,
-    category: 'sembako'
+    category: 'sembako',
+    sku: `SKU-SM-${i + 1}`,
+    barcode: `8989999${(950000 + i).toString()}`
   })),
 
   ...Array.from({ length: 40 }, (_, i) => ({
@@ -191,7 +209,9 @@ let globalProducts: Product[] = [
     ][i % 6],
     price: Math.floor(Math.random() * 8000) + 5000,
     stock: Math.floor(Math.random() * 40) + 10,
-    category: 'sembako'
+    category: 'sembako',
+    sku: `SKU-ST-${i + 1}`,
+    barcode: `8988888${(970000 + i).toString()}`
   })),
 
   ...Array.from({ length: 30 }, (_, i) => ({
@@ -202,7 +222,9 @@ let globalProducts: Product[] = [
     ][i % 6],
     price: Math.floor(Math.random() * 8000) + 12000,
     stock: Math.floor(Math.random() * 35) + 10,
-    category: 'sembako'
+    category: 'sembako',
+    sku: `SKU-SGG-${i + 1}`,
+    barcode: `8987777${(980000 + i).toString()}`
   })),
 
   // Rokok (Cigarettes) - 100 products
@@ -215,7 +237,9 @@ let globalProducts: Product[] = [
     ][i % 10],
     price: Math.floor(Math.random() * 10000) + 18000,
     stock: Math.floor(Math.random() * 50) + 10,
-    category: 'rokok'
+    category: 'rokok',
+    sku: `SKU-R-${i + 1}`,
+    barcode: `8986666${(990000 + i).toString()}`
   })),
 
   // Alat Tulis (Stationery) - 50 products
@@ -228,7 +252,9 @@ let globalProducts: Product[] = [
     ][i % 10],
     price: Math.floor(Math.random() * 15000) + 2000,
     stock: Math.floor(Math.random() * 60) + 15,
-    category: 'alat-tulis'
+    category: 'alat-tulis',
+    sku: `SKU-AT-${i + 1}`,
+    barcode: `8985555${(995000 + i).toString()}`
   }))
 ];
 
