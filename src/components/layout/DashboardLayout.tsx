@@ -14,6 +14,17 @@ import {
   User
 } from 'lucide-react';
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  category: string;
+  sku: string;
+  barcode: string;
+  image?: string;
+}
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
   currentUser: {
@@ -27,6 +38,7 @@ interface DashboardLayoutProps {
   onTabChange: (tab: 'transaction' | 'stock' | 'insight') => void;
   onStoreChange?: (store: string) => void;
   onProfileClick?: () => void;
+  products?: Product[];
 }
 
 const DashboardLayout = ({ 
@@ -35,7 +47,8 @@ const DashboardLayout = ({
   activeTab, 
   onTabChange,
   onStoreChange,
-  onProfileClick 
+  onProfileClick,
+  products = []
 }: DashboardLayoutProps) => {
   const [showStoreSelector, setShowStoreSelector] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -69,21 +82,17 @@ const DashboardLayout = ({
     { id: 'insight' as const, label: 'Insight', icon: BarChart3 },
   ];
 
-  const lowStockProducts = [
-    { id: 1, name: 'Indomie Goreng', stock: 5, time: '2 menit lalu', type: 'warning' },
-    { id: 2, name: 'Aqua 600ml', stock: 8, time: '5 menit lalu', type: 'warning' },
-    { id: 3, name: 'Minyak Goreng Bimoli 1L', stock: 3, time: '10 menit lalu', type: 'danger' },
-  ];
-
+  // Generate notifications based on actual product stock
+  const lowStockProducts = products.filter(product => product.stock <= 10);
+  
   const notifications = [
     ...lowStockProducts.map(product => ({
       id: product.id,
-      message: `Stok ${product.name} hampir habis (${product.stock})`,
-      time: product.time,
-      type: product.stock <= 5 ? 'danger' : 'warning'
+      message: `Stok ${product.name} ${product.stock === 0 ? 'habis' : 'hampir habis'} (${product.stock})`,
+      time: '5 menit lalu',
+      type: product.stock === 0 ? 'danger' : product.stock <= 5 ? 'danger' : 'warning'
     })),
-    { id: 4, message: 'Transaksi berhasil - Rp 25.000', time: '15 menit lalu', type: 'success' },
-    { id: 5, message: 'Produk baru ditambahkan', time: '30 menit lalu', type: 'info' },
+    { id: 'recent-sale', message: 'Transaksi berhasil - Rp 25.000', time: '15 menit lalu', type: 'success' },
   ];
 
   return (
@@ -102,7 +111,7 @@ const DashboardLayout = ({
               </div>
               
               {currentUser.role === 'owner' && currentUser.stores && (
-                <div className="relative">
+                <div className="relative hidden md:block">
                   <Button
                     variant="ghost"
                     onClick={() => setShowStoreSelector(!showStoreSelector)}
@@ -137,8 +146,8 @@ const DashboardLayout = ({
             </div>
 
             <div className="flex items-center space-x-3">
-              {/* Greeting */}
-              <div className="hidden md:block text-right mr-4">
+              {/* Greeting - Hidden on mobile */}
+              <div className="hidden lg:block text-right mr-4">
                 <p className="text-sm text-muted-foreground">{getGreeting()}</p>
                 <p className="text-lg font-semibold text-foreground">{currentUser.name}</p>
               </div>
@@ -152,33 +161,41 @@ const DashboardLayout = ({
                   onClick={() => setShowNotifications(!showNotifications)}
                 >
                   <Bell className="w-5 h-5" />
-                  <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-red-500" />
+                  {notifications.length > 0 && (
+                    <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-red-500" />
+                  )}
                 </Button>
                 
                 {showNotifications && (
-                  <div className="absolute top-full right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-xl shadow-apple-lg border border-gray-200 py-2 z-10">
+                  <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 max-w-[95vw] bg-white rounded-xl shadow-apple-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
                       <h3 className="font-semibold text-foreground">Notifikasi</h3>
                     </div>
-                    <div className="max-h-[70vh] overflow-y-auto">
-                      {notifications.map((notif) => (
-                        <div 
-                          key={notif.id} 
-                          className={`px-4 py-3 hover:bg-gray-50 border-b border-gray-50`}
-                        >
-                          <div className="flex items-start">
-                            <div className={`w-2 h-2 mt-2 rounded-full mr-2 ${
-                              notif.type === 'danger' ? 'bg-red-500' :
-                              notif.type === 'warning' ? 'bg-yellow-500' :
-                              notif.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
-                            }`} />
-                            <div className="flex-1 pr-2">
-                              <p className="text-sm text-foreground">{notif.message}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{notif.time}</p>
+                    <div className="max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="px-4 py-6 text-center text-muted-foreground">
+                          Tidak ada notifikasi
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div 
+                            key={notif.id} 
+                            className="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-b-0"
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${
+                                notif.type === 'danger' ? 'bg-red-500' :
+                                notif.type === 'warning' ? 'bg-yellow-500' :
+                                notif.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-foreground break-words">{notif.message}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{notif.time}</p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </div>
                 )}

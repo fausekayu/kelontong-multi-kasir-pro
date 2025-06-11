@@ -41,35 +41,100 @@ interface SaleHistoryItem {
   paymentMethod: string;
 }
 
-const InsightView = () => {
+interface InsightViewProps {
+  saleHistory?: SaleHistoryItem[];
+}
+
+const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [period, setPeriod] = useState('daily');
+  const [chartPeriod, setChartPeriod] = useState('daily');
+  const [salesRecapPeriod, setSalesRecapPeriod] = useState('daily');
 
-  // Sample data for charts
-  const monthlySales = [
-    { month: "Jan", amount: 4500000 },
-    { month: "Feb", amount: 5200000 },
-    { month: "Mar", amount: 4800000 },
-    { month: "Apr", amount: 6100000 },
-    { month: "May", amount: 5700000 },
-    { month: "Jun", amount: 6500000 },
-    { month: "Jul", amount: 7200000 },
-    { month: "Aug", amount: 6900000 },
-    { month: "Sep", amount: 7500000 },
-    { month: "Oct", amount: 8200000 },
-    { month: "Nov", amount: 7800000 },
-    { month: "Dec", amount: 8900000 }
-  ];
-
+  // Sample data for charts - different time periods
   const dailySales = [
-    { day: "Sen", amount: 950000 },
-    { day: "Sel", amount: 820000 },
-    { day: "Rab", amount: 1100000 },
-    { day: "Kam", amount: 780000 },
-    { day: "Jum", amount: 1250000 },
-    { day: "Sab", amount: 1500000 },
-    { day: "Min", amount: 950000 }
+    { period: "Sen", amount: 950000 },
+    { period: "Sel", amount: 820000 },
+    { period: "Rab", amount: 1100000 },
+    { period: "Kam", amount: 780000 },
+    { period: "Jum", amount: 1250000 },
+    { period: "Sab", amount: 1500000 },
+    { period: "Min", amount: 950000 }
   ];
+
+  const weeklySales = [
+    { period: "Minggu 1", amount: 6500000 },
+    { period: "Minggu 2", amount: 7200000 },
+    { period: "Minggu 3", amount: 6800000 },
+    { period: "Minggu 4", amount: 8100000 }
+  ];
+
+  const monthlySales = [
+    { period: "Jan", amount: 4500000 },
+    { period: "Feb", amount: 5200000 },
+    { period: "Mar", amount: 4800000 },
+    { period: "Apr", amount: 6100000 },
+    { period: "May", amount: 5700000 },
+    { period: "Jun", amount: 6500000 },
+    { period: "Jul", amount: 7200000 },
+    { period: "Aug", amount: 6900000 },
+    { period: "Sep", amount: 7500000 },
+    { period: "Oct", amount: 8200000 },
+    { period: "Nov", amount: 7800000 },
+    { period: "Dec", amount: 8900000 }
+  ];
+
+  const yearlySales = [
+    { period: "2021", amount: 45000000 },
+    { period: "2022", amount: 62000000 },
+    { period: "2023", amount: 78000000 },
+    { period: "2024", amount: 85000000 },
+    { period: "2025", amount: 92000000 }
+  ];
+
+  const getChartData = () => {
+    switch (chartPeriod) {
+      case 'daily': return dailySales;
+      case 'weekly': return weeklySales;
+      case 'monthly': return monthlySales;
+      case 'yearly': return yearlySales;
+      default: return dailySales;
+    }
+  };
+
+  // Sample sales recap data
+  const dailyRecap = [
+    { id: '1', period: '11 Jun 2025', transactions: 25, revenue: 2450000, topProduct: 'Indomie Goreng' },
+    { id: '2', period: '10 Jun 2025', transactions: 32, revenue: 3100000, topProduct: 'Aqua 600ml' },
+    { id: '3', period: '09 Jun 2025', transactions: 28, revenue: 2780000, topProduct: 'Beras Cap Jago 5kg' },
+  ];
+
+  const weeklyRecap = [
+    { id: '1', period: 'Minggu 1 Jun 2025', transactions: 165, revenue: 15500000, topProduct: 'Indomie Goreng' },
+    { id: '2', period: 'Minggu 4 May 2025', transactions: 142, revenue: 13200000, topProduct: 'Aqua 600ml' },
+    { id: '3', period: 'Minggu 3 May 2025', transactions: 158, revenue: 14800000, topProduct: 'Minyak Goreng Bimoli 1L' },
+  ];
+
+  const monthlyRecap = [
+    { id: '1', period: 'Juni 2025', transactions: 650, revenue: 65000000, topProduct: 'Indomie Goreng' },
+    { id: '2', period: 'Mei 2025', transactions: 580, revenue: 57000000, topProduct: 'Aqua 600ml' },
+    { id: '3', period: 'April 2025', transactions: 610, revenue: 61000000, topProduct: 'Beras Cap Jago 5kg' },
+  ];
+
+  const yearlyRecap = [
+    { id: '1', period: '2025', transactions: 7800, revenue: 920000000, topProduct: 'Indomie Goreng' },
+    { id: '2', period: '2024', transactions: 6500, revenue: 850000000, topProduct: 'Aqua 600ml' },
+    { id: '3', period: '2023', transactions: 5200, revenue: 780000000, topProduct: 'Beras Cap Jago 5kg' },
+  ];
+
+  const getSalesRecapData = () => {
+    switch (salesRecapPeriod) {
+      case 'daily': return dailyRecap;
+      case 'weekly': return weeklyRecap;
+      case 'monthly': return monthlyRecap;
+      case 'yearly': return yearlyRecap;
+      default: return dailyRecap;
+    }
+  };
 
   const topProducts: SaleData[] = [
     { name: "Indomie Goreng", value: 150 },
@@ -87,70 +152,6 @@ const InsightView = () => {
     { name: "Rokok", value: 120 }
   ];
 
-  // Sample transaction history
-  const saleHistory: SaleHistoryItem[] = [
-    {
-      id: "TRX-001",
-      date: "11 Jun 2025",
-      time: "08:15",
-      items: [
-        { name: "Indomie Goreng", quantity: 5, price: 3500 },
-        { name: "Aqua 600ml", quantity: 2, price: 5000 },
-        { name: "Teh Botol Sosro", quantity: 1, price: 7000 }
-      ],
-      total: 35500,
-      paymentMethod: "Tunai"
-    },
-    {
-      id: "TRX-002",
-      date: "11 Jun 2025",
-      time: "09:23",
-      items: [
-        { name: "Beras Cap Jago 5kg", quantity: 1, price: 65000 },
-        { name: "Minyak Goreng Bimoli 1L", quantity: 2, price: 25000 },
-        { name: "Gula Pasir Gulaku 1kg", quantity: 1, price: 18000 }
-      ],
-      total: 133000,
-      paymentMethod: "QRIS"
-    },
-    {
-      id: "TRX-003",
-      date: "11 Jun 2025",
-      time: "10:45",
-      items: [
-        { name: "Shampo Clear Men", quantity: 1, price: 28500 },
-        { name: "Sabun Lifebuoy", quantity: 2, price: 5500 },
-        { name: "Pasta Gigi Pepsodent", quantity: 1, price: 15000 }
-      ],
-      total: 54500,
-      paymentMethod: "Debit"
-    },
-    {
-      id: "TRX-004",
-      date: "11 Jun 2025",
-      time: "11:30",
-      items: [
-        { name: "Marlboro Red 20", quantity: 1, price: 35000 },
-        { name: "Kopi Kapal Api", quantity: 2, price: 2500 },
-        { name: "Pocari Sweat", quantity: 1, price: 8000 }
-      ],
-      total: 48000,
-      paymentMethod: "Tunai"
-    },
-    {
-      id: "TRX-005",
-      date: "11 Jun 2025",
-      time: "13:15",
-      items: [
-        { name: "Chitato Keju", quantity: 3, price: 10000 },
-        { name: "Coca Cola 330ml", quantity: 4, price: 6000 },
-        { name: "Good Time Choco Chip", quantity: 2, price: 12000 }
-      ],
-      total: 78000,
-      paymentMethod: "QRIS"
-    }
-  ];
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -161,7 +162,7 @@ const InsightView = () => {
 
   const dailyRevenue = saleHistory.reduce((total, sale) => total + sale.total, 0);
   const dailyTransactions = saleHistory.length;
-  const avgTransactionValue = dailyRevenue / dailyTransactions;
+  const avgTransactionValue = dailyTransactions > 0 ? dailyRevenue / dailyTransactions : 0;
 
   return (
     <div className="space-y-4 pb-6">
@@ -211,7 +212,7 @@ const InsightView = () => {
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="overview">Ikhtisar</TabsTrigger>
-            <TabsTrigger value="history">Riwayat Penjualan</TabsTrigger>
+            <TabsTrigger value="recap">Rekap Penjualan</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="mt-4">
@@ -223,31 +224,22 @@ const InsightView = () => {
                   Grafik Penjualan
                 </h3>
                 
-                <Tabs value={period} onValueChange={setPeriod}>
-                  <TabsList>
+                <Tabs value={chartPeriod} onValueChange={setChartPeriod}>
+                  <TabsList className="grid grid-cols-4">
                     <TabsTrigger value="daily">Harian</TabsTrigger>
+                    <TabsTrigger value="weekly">Mingguan</TabsTrigger>
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+                    <TabsTrigger value="yearly">Tahunan</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
               
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  {period === 'monthly' ? (
-                    <BarChart data={monthlySales}>
+                  {chartPeriod === 'daily' || chartPeriod === 'weekly' ? (
+                    <LineChart data={getChartData()}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis
-                        tickFormatter={(value) => formatCurrency(value).replace('Rp', '')}
-                      />
-                      <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                      <Legend />
-                      <Bar dataKey="amount" name="Penjualan" fill="#4f46e5" />
-                    </BarChart>
-                  ) : (
-                    <LineChart data={dailySales}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
+                      <XAxis dataKey="period" />
                       <YAxis 
                         tickFormatter={(value) => formatCurrency(value).replace('Rp', '')}
                       />
@@ -255,6 +247,17 @@ const InsightView = () => {
                       <Legend />
                       <Line type="monotone" dataKey="amount" name="Penjualan" stroke="#4f46e5" activeDot={{ r: 8 }} />
                     </LineChart>
+                  ) : (
+                    <BarChart data={getChartData()}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="period" />
+                      <YAxis
+                        tickFormatter={(value) => formatCurrency(value).replace('Rp', '')}
+                      />
+                      <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                      <Legend />
+                      <Bar dataKey="amount" name="Penjualan" fill="#4f46e5" />
+                    </BarChart>
                   )}
                 </ResponsiveContainer>
               </div>
@@ -298,39 +301,52 @@ const InsightView = () => {
             </div>
           </TabsContent>
           
-          <TabsContent value="history" className="mt-4">
+          <TabsContent value="recap" className="mt-4">
             <Card className="p-4 mb-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold flex items-center">
                   <Calendar className="w-5 h-5 mr-2 text-primary" />
-                  Penjualan Hari Ini
+                  Rekap Penjualan
                 </h3>
-                <span className="text-sm text-muted-foreground">11 Juni 2025</span>
+                
+                <Tabs value={salesRecapPeriod} onValueChange={setSalesRecapPeriod}>
+                  <TabsList className="grid grid-cols-4">
+                    <TabsTrigger value="daily">Harian</TabsTrigger>
+                    <TabsTrigger value="weekly">Mingguan</TabsTrigger>
+                    <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+                    <TabsTrigger value="yearly">Tahunan</TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
               
               <div className="space-y-4">
-                {saleHistory.map((sale) => (
-                  <Card key={sale.id} className="p-4 border border-gray-100">
+                {getSalesRecapData().map((recap) => (
+                  <Card key={recap.id} className="p-4 border border-gray-100">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <span className="font-medium">{sale.id}</span>
-                        <p className="text-xs text-muted-foreground">{sale.time} • {sale.date}</p>
+                        <span className="font-medium text-lg">{recap.period}</span>
+                        <p className="text-sm text-muted-foreground">
+                          {recap.transactions} transaksi • Produk terlaris: {recap.topProduct}
+                        </p>
                       </div>
-                      <Badge variant="outline">{sale.paymentMethod}</Badge>
+                      <Badge variant="outline">
+                        {formatCurrency(recap.revenue)}
+                      </Badge>
                     </div>
                     
-                    <div className="space-y-2 mb-3">
-                      {sale.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-sm">
-                          <span>{item.name} x{item.quantity}</span>
-                          <span>{formatCurrency(item.price * item.quantity)}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="flex justify-between pt-2 border-t border-dashed border-gray-200">
-                      <span className="font-medium">Total</span>
-                      <span className="font-bold text-primary">{formatCurrency(sale.total)}</span>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Total Transaksi</p>
+                        <p className="font-semibold">{recap.transactions}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Pendapatan</p>
+                        <p className="font-semibold text-primary">{formatCurrency(recap.revenue)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Rata-rata per Transaksi</p>
+                        <p className="font-semibold">{formatCurrency(recap.revenue / recap.transactions)}</p>
+                      </div>
                     </div>
                   </Card>
                 ))}
