@@ -10,7 +10,8 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  Package
+  Package,
+  History
 } from 'lucide-react';
 import {
   BarChart,
@@ -25,6 +26,7 @@ import {
   Line,
 } from 'recharts';
 import { Button } from '@/components/ui/button';
+import OrderHistory from './OrderHistory';
 
 interface SaleData {
   name: string;
@@ -540,16 +542,16 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
                   </Button>
 
                   {expandedItems[`week-${month.monthNumber}-${week.weekNumber}`] && week.days && (
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-2 space-y-2">
                       {week.days.map((day) => (
-                        <div key={day.date} className="p-2 bg-background rounded border">
+                        <div key={day.date} className="p-2 bg-muted/20 rounded">
                           <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm font-medium">{day.date}</span>
+                            <span className="text-xs font-medium">{day.date}</span>
                             <span className="text-xs text-primary font-semibold">
                               {formatCurrency(day.revenue)}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground mb-2">
+                          <p className="text-xs text-muted-foreground mb-1">
                             {day.transactions} transaksi
                           </p>
                           {renderProductList(day.products)}
@@ -754,9 +756,10 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2">
+          <TabsList className="grid grid-cols-3">
             <TabsTrigger value="overview">Ikhtisar</TabsTrigger>
             <TabsTrigger value="recap">Rekap Penjualan</TabsTrigger>
+            <TabsTrigger value="orders">Riwayat Pesanan</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="mt-4">
@@ -865,6 +868,10 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
               
               {renderRecapContent()}
             </Card>
+          </TabsContent>
+
+          <TabsContent value="orders" className="mt-4">
+            <OrderHistory saleHistory={saleHistory} />
           </TabsContent>
         </Tabs>
       </div>
