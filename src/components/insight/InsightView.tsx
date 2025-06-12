@@ -44,6 +44,7 @@ interface SaleHistoryItem {
   }[];
   total: number;
   paymentMethod: string;
+  status: 'completed' | 'pending' | 'cancelled';
 }
 
 interface InsightViewProps {
