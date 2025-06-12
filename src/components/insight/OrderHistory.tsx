@@ -41,7 +41,13 @@ const OrderHistory = ({ saleHistory = [] }: OrderHistoryProps) => {
     { value: 'semua', label: 'Semua Tanggal' },
     { value: 'hari-ini', label: 'Hari Ini' },
     { value: '7-hari', label: '7 Hari Terakhir' },
-    { value: '30-hari', label: '30 Hari Terakhir' }
+    { value: '30-hari', label: '30 Hari Terakhir' },
+    { value: 'tahun-ini', label: 'Tahun Ini' },
+    { value: '2024', label: 'Tahun 2024' },
+    { value: '2023', label: 'Tahun 2023' },
+    { value: '2022', label: 'Tahun 2022' },
+    { value: '2021', label: 'Tahun 2021' },
+    { value: '2020', label: 'Tahun 2020' }
   ];
 
   // Function to check if a date falls within the selected filter
@@ -62,6 +68,14 @@ const OrderHistory = ({ saleHistory = [] }: OrderHistoryProps) => {
         const thirtyDaysAgo = new Date(today);
         thirtyDaysAgo.setDate(today.getDate() - 30);
         return orderDateObj >= thirtyDaysAgo && orderDateObj <= today;
+      case 'tahun-ini':
+        return orderDateObj.getFullYear() === today.getFullYear();
+      case '2024':
+      case '2023':
+      case '2022':
+      case '2021':
+      case '2020':
+        return orderDateObj.getFullYear() === parseInt(filter);
       default:
         return true;
     }

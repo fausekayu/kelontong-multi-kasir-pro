@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AuthLayout from '@/components/auth/AuthLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -44,6 +43,7 @@ const Index = () => {
     currentStore: 'Toko Cabang 1',
     stores: ['Toko Cabang 1', 'Toko Cabang 2'],
   });
+
   const [products, setProducts] = useState<Product[]>([
     {
       id: "PRD-001",
@@ -147,44 +147,47 @@ const Index = () => {
     },
   ]);
 
-  // Generate comprehensive sale history for a full year (365 days)
-  const generateYearlyOrderHistory = (): SaleHistoryItem[] => {
+  // Generate comprehensive sale history for 5 years (1825 days)
+  const generateFiveYearOrderHistory = (): SaleHistoryItem[] => {
     const orders: SaleHistoryItem[] = [];
     const productNames = [
       "Indomie Goreng", "Aqua 600ml", "Coca Cola 330ml", "Beras Cap Jago 5kg",
       "Minyak Goreng Bimoli 1L", "Susu Ultra Milk Cokelat 200ml", "Teh Botol Sosro",
       "Gula Pasir Gulaku 1kg", "Sabun Mandi Lifebuoy", "Shampo Clear Men",
       "Chitato Keju", "Kopi Kapal Api", "Good Time Choco Chip", "Pocari Sweat",
-      "Marlboro Red 20", "Pasta Gigi Pepsodent"
+      "Marlboro Red 20", "Pasta Gigi Pepsodent", "Rinso Anti Noda", "SOS Pembersih Lantai",
+      "Sunlight Pencuci Piring", "Royco Rasa Ayam", "Bango Kecap Manis", "ABC Sambal",
+      "Sarimi Ayam Bawang", "Pop Mie Rasa Ayam", "Sedaap Goreng", "Teh Pucuk Harum",
+      "Fanta Orange", "Sprite 330ml", "Minute Maid Orange", "Le Minerale 600ml"
     ];
     
     const productPrices: { [key: string]: number } = {
-      "Indomie Goreng": 3500,
-      "Aqua 600ml": 5000,
-      "Coca Cola 330ml": 6000,
-      "Beras Cap Jago 5kg": 65000,
-      "Minyak Goreng Bimoli 1L": 25000,
-      "Susu Ultra Milk Cokelat 200ml": 5500,
-      "Teh Botol Sosro": 7000,
-      "Gula Pasir Gulaku 1kg": 18000,
-      "Sabun Mandi Lifebuoy": 4000,
-      "Shampo Clear Men": 28500,
-      "Chitato Keju": 10000,
-      "Kopi Kapal Api": 2500,
-      "Good Time Choco Chip": 12000,
-      "Pocari Sweat": 8000,
-      "Marlboro Red 20": 35000,
-      "Pasta Gigi Pepsodent": 15000
+      "Indomie Goreng": 3500, "Aqua 600ml": 5000, "Coca Cola 330ml": 6000,
+      "Beras Cap Jago 5kg": 65000, "Minyak Goreng Bimoli 1L": 25000,
+      "Susu Ultra Milk Cokelat 200ml": 5500, "Teh Botol Sosro": 7000,
+      "Gula Pasir Gulaku 1kg": 18000, "Sabun Mandi Lifebuoy": 4000,
+      "Shampo Clear Men": 28500, "Chitato Keju": 10000, "Kopi Kapal Api": 2500,
+      "Good Time Choco Chip": 12000, "Pocari Sweat": 8000, "Marlboro Red 20": 35000,
+      "Pasta Gigi Pepsodent": 15000, "Rinso Anti Noda": 12000, "SOS Pembersih Lantai": 8500,
+      "Sunlight Pencuci Piring": 6000, "Royco Rasa Ayam": 1500, "Bango Kecap Manis": 7500,
+      "ABC Sambal": 4500, "Sarimi Ayam Bawang": 3000, "Pop Mie Rasa Ayam": 4000,
+      "Sedaap Goreng": 3200, "Teh Pucuk Harum": 4500, "Fanta Orange": 5500,
+      "Sprite 330ml": 5500, "Minute Maid Orange": 6500, "Le Minerale 600ml": 4500
     };
 
-    const paymentMethods = ["Tunai", "QRIS", "Debit"];
-    const times = ["08:15", "09:23", "10:45", "11:20", "12:30", "13:45", "14:20", "15:15", "16:30", "17:45", "18:20", "19:30"];
+    const paymentMethods = ["Tunai", "QRIS", "Debit", "Transfer"];
+    const times = [
+      "08:15", "09:23", "10:45", "11:20", "12:30", "13:45", "14:20", 
+      "15:15", "16:30", "17:45", "18:20", "19:30", "20:15", "21:00"
+    ];
 
-    // Start from 365 days ago
+    // Start from 5 years ago (1825 days)
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 365);
+    startDate.setDate(startDate.getDate() - 1825);
 
-    for (let day = 0; day < 365; day++) {
+    let orderCounter = 1;
+
+    for (let day = 0; day < 1825; day++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(currentDate.getDate() + day);
       
@@ -194,16 +197,23 @@ const Index = () => {
         year: 'numeric'
       });
 
-      // Generate 2-8 random transactions per day
-      const transactionsPerDay = Math.floor(Math.random() * 7) + 2;
+      // Generate 3-12 random transactions per day (more variety across years)
+      const transactionsPerDay = Math.floor(Math.random() * 10) + 3;
       
       for (let t = 0; t < transactionsPerDay; t++) {
-        const orderId = `TRX-${String(day * 10 + t + 1).padStart(4, '0')}`;
-        const itemCount = Math.floor(Math.random() * 4) + 1; // 1-4 items per order
+        const orderId = `TRX-${String(orderCounter).padStart(6, '0')}`;
+        const itemCount = Math.floor(Math.random() * 6) + 1; // 1-6 items per order
         const items = [];
         
+        // Create unique items for this order
+        const selectedProducts = [];
         for (let i = 0; i < itemCount; i++) {
-          const randomProduct = productNames[Math.floor(Math.random() * productNames.length)];
+          let randomProduct;
+          do {
+            randomProduct = productNames[Math.floor(Math.random() * productNames.length)];
+          } while (selectedProducts.includes(randomProduct));
+          
+          selectedProducts.push(randomProduct);
           const quantity = Math.floor(Math.random() * 5) + 1; // 1-5 quantity
           items.push({
             name: randomProduct,
@@ -225,6 +235,8 @@ const Index = () => {
           paymentMethod: randomPayment,
           status: "completed"
         });
+        
+        orderCounter++;
       }
     }
 
@@ -236,7 +248,7 @@ const Index = () => {
     });
   };
 
-  const [saleHistory, setSaleHistory] = useState<SaleHistoryItem[]>(() => generateYearlyOrderHistory());
+  const [saleHistory, setSaleHistory] = useState<SaleHistoryItem[]>(() => generateFiveYearOrderHistory());
 
   const handleLogin = async (credentials: any) => {
     // Simple demo login

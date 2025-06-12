@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +27,7 @@ import {
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import OrderHistory from './OrderHistory';
+import ProductSales from './ProductSales';
 
 interface SaleData {
   name: string;
@@ -180,8 +180,9 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2">
+          <TabsList className="grid grid-cols-3">
             <TabsTrigger value="overview">Ikhtisar</TabsTrigger>
+            <TabsTrigger value="products">Produk Terjual</TabsTrigger>
             <TabsTrigger value="orders">Riwayat Pesanan</TabsTrigger>
           </TabsList>
           
@@ -269,6 +270,10 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
                 </div>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="products" className="mt-4">
+            <ProductSales saleHistory={saleHistory} />
           </TabsContent>
           
           <TabsContent value="orders" className="mt-4">
