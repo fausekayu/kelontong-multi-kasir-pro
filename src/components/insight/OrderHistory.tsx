@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,100 +37,46 @@ const OrderHistory = ({ saleHistory = [] }: OrderHistoryProps) => {
   const [selectedFilter, setSelectedFilter] = useState('semua');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  // Sample order data with more variety
-  const orderData: OrderHistoryItem[] = [
-    {
-      id: "TRX-001",
-      date: "11 Jun 2025",
-      time: "08:15",
-      items: [
-        { name: "Indomie Goreng", quantity: 5, price: 3500 },
-        { name: "Aqua 600ml", quantity: 2, price: 5000 },
-        { name: "Teh Botol Sosro", quantity: 1, price: 7000 }
-      ],
-      total: 35500,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-002",
-      date: "11 Jun 2025",
-      time: "09:23",
-      items: [
-        { name: "Beras Cap Jago 5kg", quantity: 1, price: 65000 },
-        { name: "Minyak Goreng Bimoli 1L", quantity: 2, price: 25000 },
-        { name: "Gula Pasir Gulaku 1kg", quantity: 1, price: 18000 }
-      ],
-      total: 133000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-003",
-      date: "11 Jun 2025",
-      time: "10:45",
-      items: [
-        { name: "Shampo Clear Men", quantity: 1, price: 28500 },
-        { name: "Sabun Lifebuoy", quantity: 2, price: 4000 },
-        { name: "Pasta Gigi Pepsodent", quantity: 1, price: 15000 }
-      ],
-      total: 51500,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-004",
-      date: "10 Jun 2025",
-      time: "14:30",
-      items: [
-        { name: "Coca Cola 330ml", quantity: 3, price: 6000 },
-        { name: "Chitato Keju", quantity: 2, price: 10000 },
-        { name: "Kopi Kapal Api", quantity: 1, price: 2500 }
-      ],
-      total: 40500,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-005",
-      date: "10 Jun 2025",
-      time: "16:15",
-      items: [
-        { name: "Ultra Milk Coklat", quantity: 4, price: 5500 },
-        { name: "Good Time Choco Chip", quantity: 1, price: 12000 }
-      ],
-      total: 34000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-006",
-      date: "09 Jun 2025",
-      time: "11:20",
-      items: [
-        { name: "Marlboro Red 20", quantity: 1, price: 35000 },
-        { name: "Pocari Sweat", quantity: 2, price: 8000 }
-      ],
-      total: 51000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    }
-  ];
-
   const filterOptions = [
     { value: 'semua', label: 'Semua Tanggal' },
+    { value: 'hari-ini', label: 'Hari Ini' },
     { value: '7-hari', label: '7 Hari Terakhir' },
-    { value: '30-hari', label: '30 Hari Terakhir' },
-    { value: 'hari-ini', label: 'Hari Ini' }
+    { value: '30-hari', label: '30 Hari Terakhir' }
   ];
 
-  const filteredOrders = orderData.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Function to check if a date falls within the selected filter
+  const isDateInFilter = (orderDate: string, filter: string): boolean => {
+    if (filter === 'semua') return true;
     
-    // For now, we'll show all orders regardless of filter
-    return matchesSearch;
-  });
+    const today = new Date();
+    const orderDateObj = new Date(orderDate);
+    
+    switch (filter) {
+      case 'hari-ini':
+        return orderDateObj.toDateString() === today.toDateString();
+      case '7-hari':
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 7);
+        return orderDateObj >= sevenDaysAgo && orderDateObj <= today;
+      case '30-hari':
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        return orderDateObj >= thirtyDaysAgo && orderDateObj <= today;
+      default:
+        return true;
+    }
+  };
+
+  const filteredOrders = useMemo(() => {
+    return saleHistory.filter(order => {
+      const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesFilter = isDateInFilter(order.date, selectedFilter);
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [saleHistory, searchQuery, selectedFilter]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -170,6 +116,11 @@ const OrderHistory = ({ saleHistory = [] }: OrderHistoryProps) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
   };
 
+  // Calculate summary stats for filtered orders
+  const totalOrders = filteredOrders.length;
+  const totalRevenue = filteredOrders.reduce((sum, order) => sum + order.total, 0);
+  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -179,6 +130,28 @@ const OrderHistory = ({ saleHistory = [] }: OrderHistoryProps) => {
           <Calendar className="w-5 h-5 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Filter Tanggal Pesanan</span>
         </div>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="p-3">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Pesanan</p>
+            <p className="text-lg font-bold text-primary">{totalOrders}</p>
+          </div>
+        </Card>
+        <Card className="p-3">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Pendapatan</p>
+            <p className="text-lg font-bold text-green-600">{formatCurrency(totalRevenue)}</p>
+          </div>
+        </Card>
+        <Card className="p-3">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Rata-rata Pesanan</p>
+            <p className="text-lg font-bold text-blue-600">{formatCurrency(avgOrderValue)}</p>
+          </div>
+        </Card>
       </div>
 
       {/* Filter Section */}

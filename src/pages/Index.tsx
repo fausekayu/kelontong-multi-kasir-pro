@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import AuthLayout from '@/components/auth/AuthLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -145,373 +146,97 @@ const Index = () => {
       image: "https://s3.bukalapak.com/img/34349489452/s-461-461/data.png"
     },
   ]);
-  const [saleHistory, setSaleHistory] = useState<SaleHistoryItem[]>([
-    {
-      id: "TRX-001",
-      date: "11 Jun 2025",
-      time: "08:15",
-      items: [
-        { name: "Indomie Goreng", quantity: 5, price: 3500 },
-        { name: "Aqua 600ml", quantity: 2, price: 5000 },
-        { name: "Teh Botol Sosro", quantity: 1, price: 7000 }
-      ],
-      total: 35500,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-002",
-      date: "11 Jun 2025",
-      time: "09:23",
-      items: [
-        { name: "Beras Cap Jago 5kg", quantity: 1, price: 65000 },
-        { name: "Minyak Goreng Bimoli 1L", quantity: 2, price: 25000 },
-        { name: "Gula Pasir Gulaku 1kg", quantity: 1, price: 18000 }
-      ],
-      total: 133000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-003",
-      date: "11 Jun 2025",
-      time: "10:45",
-      items: [
-        { name: "Shampo Clear Men", quantity: 1, price: 28500 },
-        { name: "Sabun Lifebuoy", quantity: 2, price: 4000 },
-        { name: "Pasta Gigi Pepsodent", quantity: 1, price: 15000 }
-      ],
-      total: 51500,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-004",
-      date: "10 Jun 2025",
-      time: "14:30",
-      items: [
-        { name: "Coca Cola 330ml", quantity: 3, price: 6000 },
-        { name: "Chitato Keju", quantity: 2, price: 10000 },
-        { name: "Kopi Kapal Api", quantity: 1, price: 2500 }
-      ],
-      total: 40500,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-005",
-      date: "10 Jun 2025",
-      time: "16:15",
-      items: [
-        { name: "Ultra Milk Coklat", quantity: 4, price: 5500 },
-        { name: "Good Time Choco Chip", quantity: 1, price: 12000 }
-      ],
-      total: 34000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-006",
-      date: "09 Jun 2025",
-      time: "11:20",
-      items: [
-        { name: "Marlboro Red 20", quantity: 1, price: 35000 },
-        { name: "Pocari Sweat", quantity: 2, price: 8000 }
-      ],
-      total: 51000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-007",
-      date: "08 Jun 2025",
-      time: "13:45",
-      items: [
-        { name: "Indomie Goreng", quantity: 8, price: 3500 },
-        { name: "Aqua 600ml", quantity: 3, price: 5000 }
-      ],
-      total: 43000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-008",
-      date: "07 Jun 2025",
-      time: "09:30",
-      items: [
-        { name: "Beras Cap Jago 5kg", quantity: 2, price: 65000 },
-        { name: "Minyak Goreng Bimoli 1L", quantity: 1, price: 25000 }
-      ],
-      total: 155000,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-009",
-      date: "06 Jun 2025",
-      time: "15:20",
-      items: [
-        { name: "Coca Cola 330ml", quantity: 6, price: 6000 },
-        { name: "Chitato Keju", quantity: 3, price: 10000 }
-      ],
-      total: 66000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-010",
-      date: "05 Jun 2025",
-      time: "12:10",
-      items: [
-        { name: "Shampo Clear Men", quantity: 2, price: 28500 },
-        { name: "Sabun Lifebuoy", quantity: 4, price: 4000 }
-      ],
-      total: 73000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-011",
-      date: "04 Jun 2025",
-      time: "08:45",
-      items: [
-        { name: "Teh Botol Sosro", quantity: 5, price: 7000 },
-        { name: "Pocari Sweat", quantity: 3, price: 8000 }
-      ],
-      total: 59000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-012",
-      date: "03 Jun 2025",
-      time: "14:15",
-      items: [
-        { name: "Ultra Milk Coklat", quantity: 6, price: 5500 },
-        { name: "Good Time Choco Chip", quantity: 2, price: 12000 }
-      ],
-      total: 57000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-013",
-      date: "02 Jun 2025",
-      time: "10:30",
-      items: [
-        { name: "Gula Pasir Gulaku 1kg", quantity: 3, price: 18000 },
-        { name: "Kopi Kapal Api", quantity: 5, price: 2500 }
-      ],
-      total: 66500,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-014",
-      date: "01 Jun 2025",
-      time: "16:45",
-      items: [
-        { name: "Marlboro Red 20", quantity: 2, price: 35000 },
-        { name: "Aqua 600ml", quantity: 4, price: 5000 }
-      ],
-      total: 90000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    // May 2025 data (continuing backwards)
-    {
-      id: "TRX-015",
-      date: "31 May 2025",
-      time: "13:20",
-      items: [
-        { name: "Indomie Goreng", quantity: 10, price: 3500 },
-        { name: "Coca Cola 330ml", quantity: 4, price: 6000 }
-      ],
-      total: 59000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-016",
-      date: "30 May 2025",
-      time: "11:15",
-      items: [
-        { name: "Beras Cap Jago 5kg", quantity: 1, price: 65000 },
-        { name: "Minyak Goreng Bimoli 1L", quantity: 3, price: 25000 }
-      ],
-      total: 140000,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-017",
-      date: "29 May 2025",
-      time: "09:40",
-      items: [
-        { name: "Shampo Clear Men", quantity: 1, price: 28500 },
-        { name: "Sabun Lifebuoy", quantity: 6, price: 4000 }
-      ],
-      total: 52500,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-018",
-      date: "28 May 2025",
-      time: "15:55",
-      items: [
-        { name: "Teh Botol Sosro", quantity: 8, price: 7000 },
-        { name: "Chitato Keju", quantity: 2, price: 10000 }
-      ],
-      total: 76000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-019",
-      date: "27 May 2025",
-      time: "12:25",
-      items: [
-        { name: "Ultra Milk Coklat", quantity: 8, price: 5500 },
-        { name: "Pocari Sweat", quantity: 4, price: 8000 }
-      ],
-      total: 76000,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-020",
-      date: "26 May 2025",
-      time: "14:10",
-      items: [
-        { name: "Good Time Choco Chip", quantity: 3, price: 12000 },
-        { name: "Kopi Kapal Api", quantity: 8, price: 2500 }
-      ],
-      total: 56000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-021",
-      date: "25 May 2025",
-      time: "08:50",
-      items: [
-        { name: "Gula Pasir Gulaku 1kg", quantity: 2, price: 18000 },
-        { name: "Aqua 600ml", quantity: 6, price: 5000 }
-      ],
-      total: 66000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-022",
-      date: "24 May 2025",
-      time: "16:30",
-      items: [
-        { name: "Marlboro Red 20", quantity: 1, price: 35000 },
-        { name: "Coca Cola 330ml", quantity: 5, price: 6000 }
-      ],
-      total: 65000,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-023",
-      date: "23 May 2025",
-      time: "11:40",
-      items: [
-        { name: "Indomie Goreng", quantity: 12, price: 3500 },
-        { name: "Teh Botol Sosro", quantity: 3, price: 7000 }
-      ],
-      total: 63000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-024",
-      date: "22 May 2025",
-      time: "13:55",
-      items: [
-        { name: "Beras Cap Jago 5kg", quantity: 3, price: 65000 },
-        { name: "Minyak Goreng Bimoli 1L", quantity: 2, price: 25000 }
-      ],
-      total: 245000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-025",
-      date: "21 May 2025",
-      time: "10:20",
-      items: [
-        { name: "Shampo Clear Men", quantity: 2, price: 28500 },
-        { name: "Sabun Lifebuoy", quantity: 3, price: 4000 }
-      ],
-      total: 69000,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-026",
-      date: "20 May 2025",
-      time: "15:15",
-      items: [
-        { name: "Ultra Milk Coklat", quantity: 5, price: 5500 },
-        { name: "Pocari Sweat", quantity: 6, price: 8000 }
-      ],
-      total: 75500,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-027",
-      date: "19 May 2025",
-      time: "09:05",
-      items: [
-        { name: "Chitato Keju", quantity: 4, price: 10000 },
-        { name: "Good Time Choco Chip", quantity: 2, price: 12000 }
-      ],
-      total: 64000,
-      paymentMethod: "QRIS",
-      status: "completed"
-    },
-    {
-      id: "TRX-028",
-      date: "18 May 2025",
-      time: "14:45",
-      items: [
-        { name: "Kopi Kapal Api", quantity: 10, price: 2500 },
-        { name: "Aqua 600ml", quantity: 8, price: 5000 }
-      ],
-      total: 65000,
-      paymentMethod: "Debit",
-      status: "completed"
-    },
-    {
-      id: "TRX-029",
-      date: "17 May 2025",
-      time: "12:35",
-      items: [
-        { name: "Gula Pasir Gulaku 1kg", quantity: 4, price: 18000 },
-        { name: "Coca Cola 330ml", quantity: 3, price: 6000 }
-      ],
-      total: 90000,
-      paymentMethod: "Tunai",
-      status: "completed"
-    },
-    {
-      id: "TRX-030",
-      date: "16 May 2025",
-      time: "16:20",
-      items: [
-        { name: "Marlboro Red 20", quantity: 3, price: 35000 },
-        { name: "Teh Botol Sosro", quantity: 2, price: 7000 }
-      ],
-      total: 119000,
-      paymentMethod: "QRIS",
-      status: "completed"
+
+  // Generate comprehensive sale history for a full year (365 days)
+  const generateYearlyOrderHistory = (): SaleHistoryItem[] => {
+    const orders: SaleHistoryItem[] = [];
+    const productNames = [
+      "Indomie Goreng", "Aqua 600ml", "Coca Cola 330ml", "Beras Cap Jago 5kg",
+      "Minyak Goreng Bimoli 1L", "Susu Ultra Milk Cokelat 200ml", "Teh Botol Sosro",
+      "Gula Pasir Gulaku 1kg", "Sabun Mandi Lifebuoy", "Shampo Clear Men",
+      "Chitato Keju", "Kopi Kapal Api", "Good Time Choco Chip", "Pocari Sweat",
+      "Marlboro Red 20", "Pasta Gigi Pepsodent"
+    ];
+    
+    const productPrices: { [key: string]: number } = {
+      "Indomie Goreng": 3500,
+      "Aqua 600ml": 5000,
+      "Coca Cola 330ml": 6000,
+      "Beras Cap Jago 5kg": 65000,
+      "Minyak Goreng Bimoli 1L": 25000,
+      "Susu Ultra Milk Cokelat 200ml": 5500,
+      "Teh Botol Sosro": 7000,
+      "Gula Pasir Gulaku 1kg": 18000,
+      "Sabun Mandi Lifebuoy": 4000,
+      "Shampo Clear Men": 28500,
+      "Chitato Keju": 10000,
+      "Kopi Kapal Api": 2500,
+      "Good Time Choco Chip": 12000,
+      "Pocari Sweat": 8000,
+      "Marlboro Red 20": 35000,
+      "Pasta Gigi Pepsodent": 15000
+    };
+
+    const paymentMethods = ["Tunai", "QRIS", "Debit"];
+    const times = ["08:15", "09:23", "10:45", "11:20", "12:30", "13:45", "14:20", "15:15", "16:30", "17:45", "18:20", "19:30"];
+
+    // Start from 365 days ago
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 365);
+
+    for (let day = 0; day < 365; day++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(currentDate.getDate() + day);
+      
+      const dateStr = currentDate.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      // Generate 2-8 random transactions per day
+      const transactionsPerDay = Math.floor(Math.random() * 7) + 2;
+      
+      for (let t = 0; t < transactionsPerDay; t++) {
+        const orderId = `TRX-${String(day * 10 + t + 1).padStart(4, '0')}`;
+        const itemCount = Math.floor(Math.random() * 4) + 1; // 1-4 items per order
+        const items = [];
+        
+        for (let i = 0; i < itemCount; i++) {
+          const randomProduct = productNames[Math.floor(Math.random() * productNames.length)];
+          const quantity = Math.floor(Math.random() * 5) + 1; // 1-5 quantity
+          items.push({
+            name: randomProduct,
+            quantity,
+            price: productPrices[randomProduct]
+          });
+        }
+        
+        const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+        const randomTime = times[Math.floor(Math.random() * times.length)];
+        const randomPayment = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+        
+        orders.push({
+          id: orderId,
+          date: dateStr,
+          time: randomTime,
+          items,
+          total,
+          paymentMethod: randomPayment,
+          status: "completed"
+        });
+      }
     }
-  ]);
+
+    return orders.sort((a, b) => {
+      // Sort by date descending (newest first)
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+  };
+
+  const [saleHistory, setSaleHistory] = useState<SaleHistoryItem[]>(() => generateYearlyOrderHistory());
 
   const handleLogin = async (credentials: any) => {
     // Simple demo login
@@ -529,6 +254,10 @@ const Index = () => {
 
   const handleStoreChange = (store: string) => {
     setCurrentUser({ ...currentUser, currentStore: store });
+  };
+
+  const handleUpdateSaleHistory = (newSaleHistory: SaleHistoryItem[]) => {
+    setSaleHistory(newSaleHistory);
   };
 
   return (
@@ -557,7 +286,7 @@ const Index = () => {
               products={products}
               onUpdateProducts={setProducts}
               saleHistory={saleHistory}
-              onUpdateSaleHistory={setSaleHistory}
+              onUpdateSaleHistory={handleUpdateSaleHistory}
             />
           )}
           {activeTab === 'stock' && (
