@@ -86,7 +86,6 @@ interface MonthDetail {
 const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [chartPeriod, setChartPeriod] = useState('daily');
-  const [salesRecapPeriod, setSalesRecapPeriod] = useState('daily');
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
   const dailySales = [
@@ -757,9 +756,8 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3">
+          <TabsList className="grid grid-cols-2">
             <TabsTrigger value="overview">Ikhtisar</TabsTrigger>
-            <TabsTrigger value="recap">Rekap Penjualan</TabsTrigger>
             <TabsTrigger value="orders">Riwayat Pesanan</TabsTrigger>
           </TabsList>
           
@@ -849,28 +847,6 @@ const InsightView = ({ saleHistory = [] }: InsightViewProps) => {
             </div>
           </TabsContent>
           
-          <TabsContent value="recap" className="mt-4">
-            <Card className="p-4 mb-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Calendar className="w-5 h-5 mr-2 text-primary" />
-                  Rekap Penjualan
-                </h3>
-                
-                <Tabs value={salesRecapPeriod} onValueChange={setSalesRecapPeriod}>
-                  <TabsList className="grid grid-cols-4">
-                    <TabsTrigger value="daily">Harian</TabsTrigger>
-                    <TabsTrigger value="weekly">Mingguan</TabsTrigger>
-                    <TabsTrigger value="monthly">Bulanan</TabsTrigger>
-                    <TabsTrigger value="yearly">Tahunan</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-              
-              {renderRecapContent()}
-            </Card>
-          </TabsContent>
-
           <TabsContent value="orders" className="mt-4">
             <OrderHistory saleHistory={saleHistory} />
           </TabsContent>
